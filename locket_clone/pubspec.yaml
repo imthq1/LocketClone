@@ -1,6 +1,6 @@
 name: locket_clone
 description: "Locket Clone"
-publish_to: "none"
+publish_to: 'none'
 version: 0.1.0
 
 environment:
@@ -9,8 +9,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  dio: ^5.9.0
+  dio_cookie_manager: ^3.3.0
+  cookie_jar: ^4.0.8
   flutter_secure_storage: ^9.2.4
-  http: ^1.5.0
+  path_provider: ^2.1.5
+  provider: ^6.1.5+1
 
 dev_dependencies:
   flutter_test:
@@ -19,6 +23,6 @@ dev_dependencies:
 
 flutter:
   assets:
-    - lib/data/assets/
+    - lib/assets/
 
   uses-material-design: true
