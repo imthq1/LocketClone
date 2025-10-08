@@ -1,2 +1,5 @@
-package SocialNetwork.SocialNetwork.util.Enum;public class visibilityEnum {
+package SocialNetwork.SocialNetwork.util.Enum;
+
+public enum visibilityEnum {
+    custom, friend, privates
 }

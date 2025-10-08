@@ -3,6 +3,7 @@ package SocialNetwork.SocialNetwork.service;
 import SocialNetwork.SocialNetwork.domain.FriendRequest;
 import SocialNetwork.SocialNetwork.domain.Request.FriendRequestItemDTO;
 import SocialNetwork.SocialNetwork.domain.Response.FriendRequestBySender;
+import SocialNetwork.SocialNetwork.domain.Response.UserDTO;
 import SocialNetwork.SocialNetwork.domain.User;
 import SocialNetwork.SocialNetwork.repository.FriendRequestRepository;
 import SocialNetwork.SocialNetwork.repository.UserRepository;
@@ -38,6 +39,16 @@ public class FriendService {
         friendRequest.setAddressee(userAddressee);
         friendRequest.setStatus(friendStatus.pending);
         friendRequestRepository.save(friendRequest);
+    }
+    public UserDTO searchUser(String email) {
+        User user = userRepository.findByEmail(email);
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(user.getId());
+        userDTO.setEmail(user.getEmail());
+        userDTO.setImage(user.getImageUrl());
+        userDTO.setFullname(user.getFullname());
+        userDTO.setAddress(user.getAddress());
+        return userDTO;
     }
     public boolean existByAdresseeIdAndSender(long adressee_id, String emailSender) {
         User  userSendRequestFr = userRepository.findByEmail(emailSender);

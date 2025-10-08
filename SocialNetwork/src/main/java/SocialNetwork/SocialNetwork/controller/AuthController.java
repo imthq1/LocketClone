@@ -1,9 +1,11 @@
 package SocialNetwork.SocialNetwork.controller;
 
+import SocialNetwork.SocialNetwork.domain.FriendRequest;
 import SocialNetwork.SocialNetwork.domain.Request.ReqDTO;
 import SocialNetwork.SocialNetwork.domain.Request.ResLoginDTO;
 import SocialNetwork.SocialNetwork.domain.Response.UserDTO;
 import SocialNetwork.SocialNetwork.domain.User;
+import SocialNetwork.SocialNetwork.service.FriendService;
 import SocialNetwork.SocialNetwork.service.SessionService;
 import SocialNetwork.SocialNetwork.service.UserService;
 import SocialNetwork.SocialNetwork.util.ApiMessage;
@@ -22,12 +24,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1")
 public class AuthController {
     private final UserService userService;
+    private final FriendService friendService;
     private final SecurityUtil securityUtil;
     private final SessionService sessionService;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
@@ -38,11 +42,12 @@ public class AuthController {
     @Value("${imthang.jwt.refresh-token-validity-in-seconds:90000}")
     private long refreshTokenExpiration;
     public AuthController(UserService userService, AuthenticationManagerBuilder authenticationManagerBuilder,
-                          SecurityUtil securityUtil, SessionService sessionService) {
+                          SecurityUtil securityUtil, SessionService sessionService, FriendService friendService) {
         this.userService = userService;
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.securityUtil = securityUtil;
         this.sessionService = sessionService;
+        this.friendService = friendService;
     }
     @PostMapping("/auth/register")
     @ApiMessage("Register Account")
@@ -62,17 +67,34 @@ public class AuthController {
             throw new IdInValidException("User not logged in");
         }
         String email = emailOpt.get();
+        List<User> friendRequests=this.userService.findAcceptedByRequesterEmail(email);
         User currentUserDB = userService.getUserByEmail(email);
-        System.out.println("USER"+currentUserDB);
         if (currentUserDB == null) {
             throw new IdInValidException("User not found");
         }
+
+        UserDTO.Friend friendDTO = new UserDTO.Friend();
+
+        // Map sang DTO cho bạn bè
+        List<UserDTO> friendDtos = friendRequests.stream().map(u -> {
+            UserDTO dto = new UserDTO();
+            dto.setId(u.getId());
+            dto.setEmail(u.getEmail());
+            dto.setFullname(u.getFullname());
+            dto.setAddress(u.getAddress());
+            dto.setImage(u.getImageUrl());
+            return dto;
+        }).toList();
+        friendDTO.setFriends(friendDtos);
+        friendDTO.setSumUser(friendRequests.size());
+
         UserDTO userDTO = new UserDTO();
         userDTO.setId(currentUserDB.getId());
         userDTO.setEmail(currentUserDB.getEmail());
         userDTO.setFullname(currentUserDB.getFullname());
         userDTO.setAddress(currentUserDB.getAddress());
         userDTO.setImage(currentUserDB.getImageUrl());
+        userDTO.setFriend(friendDTO);
 
         return ResponseEntity.ok(userDTO);
     }

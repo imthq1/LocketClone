@@ -3,6 +3,7 @@ package SocialNetwork.SocialNetwork.controller;
 import SocialNetwork.SocialNetwork.domain.FriendRequest;
 import SocialNetwork.SocialNetwork.domain.Request.FriendRequestItemDTO;
 import SocialNetwork.SocialNetwork.domain.Response.FriendRequestBySender;
+import SocialNetwork.SocialNetwork.domain.Response.UserDTO;
 import SocialNetwork.SocialNetwork.service.FriendService;
 import SocialNetwork.SocialNetwork.service.UserService;
 import SocialNetwork.SocialNetwork.util.ApiMessage;
@@ -37,6 +38,7 @@ public class FriendController {
         this.friendService = friendService;
         this.securityUtil = securityUtil;
     }
+
     @PostMapping("/sendFriendByQrCode/{token}")
     @ApiMessage("send ")
     public ResponseEntity<Void> sendFriendByQrCode(@PathVariable String token)
@@ -90,6 +92,10 @@ public class FriendController {
         String email = SecurityUtil.getCurrentUserLogin().get();
         return ResponseEntity.ok(this.friendService.listFriendBySender(email, friendStatus.pending,pageable));
     }
-
+    @GetMapping("/searchUser")
+    @ApiMessage("Search a User")
+    public ResponseEntity<UserDTO> searchUser(@RequestParam String email) {
+    return ResponseEntity.ok(this.friendService.searchUser(email));
+    }
 
 }
