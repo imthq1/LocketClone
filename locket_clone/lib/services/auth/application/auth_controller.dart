@@ -14,7 +14,8 @@
 /// - Interceptor đã xử lý auto-refresh AT khi 401, nên controller không cần lo phần này.
 
 import 'package:flutter/foundation.dart';
-import '../domain/auth_repository.dart';
+import 'package:locket_clone/services/auth/data/models/res_login_dto.dart';
+import '../repository/auth_repository.dart';
 import '../../auth/data/models/user_dto.dart';
 
 class AuthController extends ChangeNotifier {
@@ -23,10 +24,12 @@ class AuthController extends ChangeNotifier {
   AuthController(this._repo);
 
   UserDTO? _user;
+  ResLoginDTO? _loginDTO;
   bool _isLoading = false;
   String? _error;
 
   UserDTO? get user => _user;
+  ResLoginDTO? get loginDTO => _loginDTO;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -45,13 +48,21 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _setResLogin(ResLoginDTO? res) {
+    _loginDTO = res;
+    notifyListeners();
+  }
+
   /// Đăng nhập → về Home nếu thành công (UI tự điều hướng khi user != null).
   Future<void> login(String email, String password) async {
     _setError(null);
     _setLoading(true);
     try {
       final u = await _repo.login(email, password);
-      _setUser(u);
+      final f = await _repo.getCurrentUser();
+      _setUser(f);
+      print('u ${u}');
+      _setResLogin(u);
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -77,7 +88,7 @@ class AuthController extends ChangeNotifier {
         address: address,
         imageUrl: imageUrl,
       );
-      _setUser(u);
+      _setResLogin(u);
     } catch (e) {
       _setError(e.toString());
     } finally {
@@ -95,6 +106,7 @@ class AuthController extends ChangeNotifier {
         _setUser(null);
       } else {
         final u = await _repo.getCurrentUser();
+        print(u.fullname);
         _setUser(u);
       }
     } catch (e) {

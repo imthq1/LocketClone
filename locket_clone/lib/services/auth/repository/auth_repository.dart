@@ -7,16 +7,16 @@
 import 'package:dio/dio.dart';
 
 import '../../../core/storage/secure_storage.dart';
-import '../../auth/data/datasources/auth_api.dart';
-import '../../auth/data/models/user_dto.dart';
-import '../../auth/data/models/res_login_dto.dart';
+import '../data/datasources/auth_api.dart';
+import '../data/models/user_dto.dart';
+import '../data/models/res_login_dto.dart';
 
 abstract class AuthRepository {
   /// Đăng nhập: lưu AT, sau đó gọi /auth/account để lấy User đầy đủ.
-  Future<UserDTO> login(String email, String password);
+  Future<ResLoginDTO> login(String email, String password);
 
   /// Đăng ký xong đăng nhập luôn (để vào Home).
-  Future<UserDTO> registerThenLogin({
+  Future<ResLoginDTO> registerThenLogin({
     required String email,
     required String password,
     required String fullname,
@@ -45,19 +45,19 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this._api, this._storage, this._dio);
 
   @override
-  Future<UserDTO> login(String email, String password) async {
+  Future<ResLoginDTO> login(String email, String password) async {
     // 1) Gọi /auth/login
     final res = await _api.login(email: email, password: password);
-
+    print(res.userLogin?.email);
     // 2) Lưu access token để interceptor gắn vào các request sau
     await _storage.writeAccessToken(res.accessToken);
 
     // 3) Gọi /auth/account để lấy thông tin đầy đủ
-    return _api.getAccount();
+    return res;
   }
 
   @override
-  Future<UserDTO> registerThenLogin({
+  Future<ResLoginDTO> registerThenLogin({
     required String email,
     required String password,
     required String fullname,

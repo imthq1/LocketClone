@@ -93,9 +93,7 @@ class AuthApi {
         '/auth/login',
         data: {'email': email, 'password': password},
       );
-      final json = _unwrap(
-        res.data,
-      );
+      final json = _unwrap(res.data);
       return ResLoginDTO.fromJson(json);
     } on DioException catch (e) {
       throw _asApiException(e);

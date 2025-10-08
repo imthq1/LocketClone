@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'core/storage/secure_storage.dart';
 import 'core/network/dio_client.dart';
 import 'services/auth/data/datasources/auth_api.dart';
-import 'services/auth/domain/auth_repository.dart';
+import 'services/auth/repository/auth_repository.dart';
 import 'services/auth/application/auth_controller.dart';
 
 import 'screens/auth/auth_gate.dart';
@@ -64,7 +64,9 @@ class LocketClone extends StatelessWidget {
                 }
                 return MaterialPageRoute(
                   builder: (_) => const Scaffold(
-                    body: Center(child: Text('Thiếu tham số cho CreateUsernameScreen')),
+                    body: Center(
+                      child: Text('Thiếu tham số cho CreateUsernameScreen'),
+                    ),
                   ),
                 );
               }
