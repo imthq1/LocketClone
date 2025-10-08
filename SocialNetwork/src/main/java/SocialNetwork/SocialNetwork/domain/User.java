@@ -2,6 +2,7 @@
 package SocialNetwork.SocialNetwork.domain;
 
 import SocialNetwork.SocialNetwork.util.SecurityUtil;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
@@ -67,6 +68,10 @@ public class User {
     @OneToMany(mappedBy = "addressee", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<FriendRequest> friendRequestsReceived = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Post> posts = new ArrayList<>();
 
     public void addSession(Session s) {
         sessions.add(s);
