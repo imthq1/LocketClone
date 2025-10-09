@@ -28,8 +28,7 @@ class HomeScreen extends StatefulWidget {
 class _CaptureBodyState extends State<HomeScreen> with WidgetsBindingObserver {
   CameraController? _controller;
   List<CameraDescription> _cameras = const [];
-  bool _hasFlash = false;
-  bool _flashOn = false;
+
   double _zoomLevel = 1.0;
   bool _isCapturing = false;
 
@@ -73,21 +72,57 @@ class _CaptureBodyState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _initSelectedCamera(CameraDescription description) async {
+    // 1) Tách controller cũ ra và xoá khỏi UI
+    final old = _controller;
+    _controller = null;
+    if (mounted) setState(() {}); // để UI tạm hiển thị placeholder
+
+    // 2) Giải phóng texture cũ trước khi tạo cái mới
+    try {
+      await old?.dispose();
+      // Android đôi khi cần 50~150ms để nhả hẳn buffer
+      if (Platform.isAndroid) {
+        await Future.delayed(const Duration(milliseconds: 120));
+      }
+    } catch (_) {}
+
+    // 3) Tạo controller mới
+    var preset = ResolutionPreset.high;
+    if (description.lensDirection == CameraLensDirection.front &&
+        Platform.isAndroid) {
+      // Một số máy bị đen preview ở front với high → hạ preset
+      preset = ResolutionPreset.medium;
+    }
+
     final ctrl = CameraController(
       description,
-      ResolutionPreset.high,
+      preset,
       enableAudio: false,
       imageFormatGroup: Platform.isIOS
           ? ImageFormatGroup.bgra8888
           : ImageFormatGroup.yuv420,
     );
+
     try {
       await ctrl.initialize();
+      // đảm bảo preview đang chạy
+      if (ctrl.value.isPreviewPaused) {
+        await ctrl.resumePreview();
+      }
+      // tắt flash mặc định để tránh xung đột khi đổi lens
+      await ctrl.setFlashMode(FlashMode.off);
       _zoomLevel = 1.0;
     } catch (e) {
       debugPrint('Camera initialize error: $e');
+      await ctrl.dispose();
+      return;
     }
-    if (!mounted) return;
+
+    if (!mounted) {
+      await ctrl.dispose();
+      return;
+    }
+
     setState(() {
       _controller?.dispose();
       _controller = ctrl;
@@ -102,41 +137,55 @@ class _CaptureBodyState extends State<HomeScreen> with WidgetsBindingObserver {
     await _initSelectedCamera(_cameras[nextIndex]);
   }
 
-  Future<void> _toggleFlash() async {
-    final c = _controller;
-    if (c == null || !_hasFlash) return;
-    _flashOn = !_flashOn;
-    await c.setFlashMode(_flashOn ? FlashMode.torch : FlashMode.off);
-    if (mounted) setState(() {});
-  }
-
   Future<void> _capture() async {
     final c = _controller;
     if (c == null || !c.value.isInitialized) return;
-    if (_isCapturing || c.value.isTakingPicture) return; // chặn spam
+    if (_isCapturing || c.value.isTakingPicture) return;
+
     _isCapturing = true;
     try {
-      // Tùy máy Android, pause preview giúp giải phóng buffer
-      if (c.value.isPreviewPaused == false) {
-        await c.pausePreview();
+      //  KHÔNG pausePreview ở đây (trừ khi máy bạn từng lỗi buffer)
+      // Nếu thật sự cần, chỉ dùng cho Android và nhớ resume trước khi push.
+
+      // 1) Chụp ảnh
+      final xfile = await c.takePicture();
+      final path = xfile.path;
+
+      // 2) Bảo đảm preview không bị paused trước khi điều hướng
+      if (c.value.isPreviewPaused) {
+        try {
+          await c.resumePreview();
+        } catch (_) {}
       }
 
-      final file = await c.takePicture();
+      if (!mounted) return;
 
-      if (mounted) {
-        await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => SendToScreen(imagePath: file.path)),
+      // 3) Đẩy màn SendToScreen sau frame hiện tại (tránh xung đột texture)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // không await để UI không bị chặn
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => SendToScreen(imagePath: path)),
         );
+      });
+    } catch (e, s) {
+      debugPrint('capture error: $e\n$s');
+      // Có thể hiển thị snack nếu cần
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Không thể chụp ảnh')));
       }
     } finally {
-      try {
-        // resume lại preview sau khi chụp xong
-        if (c.value.isPreviewPaused == true) {
-          await c.resumePreview();
-        }
-      } catch (_) {}
       _isCapturing = false;
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final c = _controller;
+    if (c != null && c.value.isInitialized && c.value.isPreviewPaused) {
+      c.resumePreview();
     }
   }
 
@@ -206,17 +255,7 @@ class _CaptureBodyState extends State<HomeScreen> with WidgetsBindingObserver {
                               fit: StackFit.expand,
                               children: [
                                 CameraPreview(c!),
-                                // Flash & zoom badges
-                                Positioned(
-                                  left: 12,
-                                  top: 12,
-                                  child: _BadgeIcon(
-                                    icon: Icons.flash_on,
-                                    enabled: _hasFlash,
-                                    isActive: _flashOn,
-                                    onTap: _toggleFlash,
-                                  ),
-                                ),
+
                                 Positioned(
                                   right: 12,
                                   top: 12,
