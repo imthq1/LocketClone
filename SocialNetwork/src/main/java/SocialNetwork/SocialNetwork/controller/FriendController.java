@@ -4,6 +4,7 @@ import SocialNetwork.SocialNetwork.domain.FriendRequest;
 import SocialNetwork.SocialNetwork.domain.Request.FriendRequestItemDTO;
 import SocialNetwork.SocialNetwork.domain.Response.FriendRequestBySender;
 import SocialNetwork.SocialNetwork.domain.Response.UserDTO;
+import SocialNetwork.SocialNetwork.domain.User;
 import SocialNetwork.SocialNetwork.service.FriendService;
 import SocialNetwork.SocialNetwork.service.UserService;
 import SocialNetwork.SocialNetwork.util.ApiMessage;
@@ -79,6 +80,11 @@ public class FriendController {
         }
         this.friendService.sendRequestFr(email, idAddressee);
         return ResponseEntity.ok().build();
+    }
+    @GetMapping("/listFr")
+    @ApiMessage("List Friend")
+    public ResponseEntity<List<UserDTO>> listFr() throws IdInValidException {
+        return ResponseEntity.ok(this.friendService.getListFr());
     }
     @GetMapping("/listRequestByAddressee")
     @ApiMessage("List request add friend to me")
