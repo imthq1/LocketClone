@@ -67,6 +67,19 @@ public class FriendService {
         friendRequest.setStatus(friendStatus.pending);
         friendRequestRepository.save(friendRequest);
     }
+    public List<UserDTO> getListFr() {
+        String email=SecurityUtil.getCurrentUserLogin().get();
+        List<User> userList=this.friendRequestRepository.findFriendsOf(email);
+        return userList.stream().map(u->{
+            UserDTO userDTO = new UserDTO();
+            userDTO.setId(u.getId());
+            userDTO.setEmail(u.getEmail());
+            userDTO.setFullname(u.getFullname());
+            userDTO.setImage(u.getImageUrl());
+            userDTO.setAddress(u.getAddress());
+            return userDTO;
+        }).toList();
+    }
     @Transactional()
     public Page<FriendRequestBySender> listFriendBySender(String senderEmail, friendStatus status, Pageable pageable) {
         User me = userService.getUserByEmail(senderEmail);
@@ -85,6 +98,7 @@ public class FriendService {
                 .status(fr.getStatus().name())
                 .build());
     }
+
     @Transactional()
     public List<FriendRequestItemDTO> listReceivedRequestsForCurrentUser() {
         String email = SecurityUtil.getCurrentUserLogin()
@@ -109,4 +123,5 @@ public class FriendService {
                 .build()
         ).toList();
     }
+
 }
