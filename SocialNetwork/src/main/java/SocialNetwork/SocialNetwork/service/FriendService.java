@@ -24,12 +24,15 @@ public class FriendService {
     private final UserRepository userRepository;
     private final UserService userService;
     private final SecurityUtil securityUtil;
+    private final ChatService chatService;
     public FriendService(FriendRequestRepository friendRequestRepository,
-                         UserRepository userRepository, UserService userService, SecurityUtil securityUtil) {
+                         UserRepository userRepository, UserService userService, SecurityUtil securityUtil,
+                         ChatService chatService) {
         this.friendRequestRepository = friendRequestRepository;
         this.userRepository = userRepository;
         this.userService = userService;
         this.securityUtil = securityUtil;
+        this.chatService = chatService;
     }
     public void sendRequestFr(String email, long addressee_id ) {
         User  userSendRequestFr = userRepository.findByEmail(email);
@@ -98,7 +101,15 @@ public class FriendService {
                 .status(fr.getStatus().name())
                 .build());
     }
-
+    public void acceptRequestBySender(String senderEmail) {
+        String emailCurrent=SecurityUtil.getCurrentUserLogin().get();
+        User userCurrent=userRepository.findByEmail(emailCurrent);
+        User userSendRequestFr = userRepository.findByEmail(senderEmail);
+        FriendRequest friendRequest = this.friendRequestRepository.findByAddressee_EmailOrRequester_Email(emailCurrent,senderEmail);
+        friendRequest.setStatus(friendStatus.accepted);
+        friendRequestRepository.save(friendRequest);
+        this.chatService.getOrCreateConversation(userCurrent,userSendRequestFr);
+    }
     @Transactional()
     public List<FriendRequestItemDTO> listReceivedRequestsForCurrentUser() {
         String email = SecurityUtil.getCurrentUserLogin()

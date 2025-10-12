@@ -5,6 +5,7 @@ import SocialNetwork.SocialNetwork.domain.Request.FriendRequestItemDTO;
 import SocialNetwork.SocialNetwork.domain.Response.FriendRequestBySender;
 import SocialNetwork.SocialNetwork.domain.Response.UserDTO;
 import SocialNetwork.SocialNetwork.domain.User;
+import SocialNetwork.SocialNetwork.service.ChatService;
 import SocialNetwork.SocialNetwork.service.FriendService;
 import SocialNetwork.SocialNetwork.service.UserService;
 import SocialNetwork.SocialNetwork.util.ApiMessage;
@@ -34,7 +35,7 @@ public class FriendController {
     private final FriendService friendService;
     private final SecurityUtil securityUtil;
     public FriendController(UserService userService, FriendService friendService,
-                            SecurityUtil securityUtil) {
+                            SecurityUtil securityUtil ) {
         this.userService = userService;
         this.friendService = friendService;
         this.securityUtil = securityUtil;
@@ -70,6 +71,13 @@ public class FriendController {
         );
         return ResponseEntity.ok(resp);
     }
+    @PutMapping("/acceptFr")
+    @ApiMessage("Accept Succesed")
+    public ResponseEntity<Void> acceptFr(@RequestParam String emailSender) {
+        friendService.acceptRequestBySender(emailSender);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/sendFriendRq/{idAddressee}")
     @ApiMessage("Add friend")
     public ResponseEntity<Void> sendFriendRq(@PathVariable long idAddressee) throws IdInValidException {

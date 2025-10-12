@@ -19,6 +19,7 @@ public interface FriendRequestRepository extends JpaRepository<FriendRequest, Lo
             Long addresseeId,
             friendStatus status
     );
+    FriendRequest findByAddressee_EmailOrRequester_Email(String addresseeEmail, String requesterEmail);
     Page<FriendRequest> findByRequester_IdAndStatus(
             Long requesterId,
             friendStatus status,
