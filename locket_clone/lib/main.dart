@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:locket_clone/screens/home/messages_screen.dart';
+import 'package:locket_clone/services/auth/application/friends_controller.dart';
+import 'package:locket_clone/services/auth/data/datasources/friend_api.dart';
+import 'package:locket_clone/services/auth/repository/friend_repository.dart';
+import 'package:locket_clone/services/auth/repository/post_repository.dart';
 import 'package:provider/provider.dart';
 
 import 'core/storage/secure_storage.dart';
@@ -6,6 +11,12 @@ import 'core/network/dio_client.dart';
 import 'services/auth/data/datasources/auth_api.dart';
 import 'services/auth/repository/auth_repository.dart';
 import 'services/auth/application/auth_controller.dart';
+
+// >>> ADD: post layer imports
+import 'services/auth/data/datasources/post_api.dart';
+
+import 'services/auth/application/post_controller.dart';
+// <<<
 
 import 'screens/auth/auth_gate.dart';
 import 'screens/home/home_screen.dart';
@@ -21,18 +32,39 @@ void main() {
 class LocketClone extends StatelessWidget {
   const LocketClone({super.key});
 
-  Future<AuthController> _initAuth() async {
+  // Khởi tạo cả AuthController và PostController dùng chung 1 Dio
+  Future<({AuthController auth, PostController post, FriendsController friend})>
+  _initControllers() async {
     final storage = SecureStorage();
     final dio = await DioClient.create(storage);
-    final api = AuthApi(dio);
-    final repo = AuthRepositoryImpl(api, storage, dio);
-    return AuthController(repo);
+
+    // Auth
+    final authApi = AuthApi(dio);
+    final authRepo = AuthRepositoryImpl(
+      authApi,
+      storage,
+    ); // giữ nguyên theo code bạn đang dùng
+    final authCtrl = AuthController(authRepo);
+
+    // Post
+    final postApi = PostApi(dio);
+    final postRepo = PostRepositoryImpl(postApi);
+    final postCtrl = PostController(postRepo);
+
+    //friend
+    final friendApi = FriendApi(dio);
+    final friendRepo = FriendRepositoryImpl(friendApi);
+    final friendCtrl = FriendsController(friendRepo);
+
+    return (auth: authCtrl, post: postCtrl, friend: friendCtrl);
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<AuthController>(
-      future: _initAuth(),
+    return FutureBuilder<
+      ({AuthController auth, PostController post, FriendsController friend})
+    >(
+      future: _initControllers(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const MaterialApp(
@@ -40,8 +72,16 @@ class LocketClone extends StatelessWidget {
             home: Scaffold(body: Center(child: CircularProgressIndicator())),
           );
         }
-        return ChangeNotifierProvider.value(
-          value: snapshot.data!,
+
+        final ctrls = snapshot.data!;
+        return MultiProvider(
+          providers: [
+            ChangeNotifierProvider<AuthController>.value(value: ctrls.auth),
+            ChangeNotifierProvider<PostController>.value(value: ctrls.post),
+            ChangeNotifierProvider<FriendsController>.value(
+              value: ctrls.friend,
+            ),
+          ],
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
             home: const AuthGate(),
@@ -49,6 +89,7 @@ class LocketClone extends StatelessWidget {
               '/home': (_) => const HomeScreen(),
               '/login': (_) => const LoginScreen(),
               '/register': (_) => const RegisterScreen(),
+              '/chat': (_) => const MessagesScreen(),
             },
             onGenerateRoute: (settings) {
               if (settings.name == CreateUsernameScreen.route) {

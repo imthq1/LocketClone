@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:locket_clone/screens/home/send_capture.dart';
+import 'package:locket_clone/screens/helpers/camera_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:locket_clone/services/auth/application/auth_controller.dart';
 
@@ -46,17 +46,6 @@ class _CaptureBodyState extends State<HomeScreen> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    final controller = _controller;
-    if (controller == null || !controller.value.isInitialized) return;
-    if (state == AppLifecycleState.inactive) {
-      controller.dispose();
-    } else if (state == AppLifecycleState.resumed) {
-      _initSelectedCamera(controller.description);
-    }
-  }
-
   Future<void> _initCamera() async {
     try {
       _cameras = await availableCameras();
@@ -71,27 +60,34 @@ class _CaptureBodyState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> _ensurePreviewRunning() async {
+    final c = _controller;
+    if (c == null) return;
+    if (c.value.isInitialized && c.value.isPreviewPaused) {
+      try {
+        await c.resumePreview();
+      } catch (e) {
+        debugPrint('resume err: $e');
+      }
+    }
+  }
+
   Future<void> _initSelectedCamera(CameraDescription description) async {
-    // 1) Tách controller cũ ra và xoá khỏi UI
     final old = _controller;
     _controller = null;
-    if (mounted) setState(() {}); // để UI tạm hiển thị placeholder
+    if (mounted) setState(() {}); // show placeholder
 
-    // 2) Giải phóng texture cũ trước khi tạo cái mới
     try {
       await old?.dispose();
-      // Android đôi khi cần 50~150ms để nhả hẳn buffer
-      if (Platform.isAndroid) {
-        await Future.delayed(const Duration(milliseconds: 120));
-      }
     } catch (_) {}
+    if (Platform.isAndroid) {
+      await Future.delayed(const Duration(milliseconds: 120));
+    }
 
-    // 3) Tạo controller mới
     var preset = ResolutionPreset.high;
-    if (description.lensDirection == CameraLensDirection.front &&
-        Platform.isAndroid) {
-      // Một số máy bị đen preview ở front với high → hạ preset
-      preset = ResolutionPreset.medium;
+    if (Platform.isAndroid &&
+        description.lensDirection == CameraLensDirection.front) {
+      preset = ResolutionPreset.medium; // vài máy front-high bị đen
     }
 
     final ctrl = CameraController(
@@ -105,13 +101,9 @@ class _CaptureBodyState extends State<HomeScreen> with WidgetsBindingObserver {
 
     try {
       await ctrl.initialize();
-      // đảm bảo preview đang chạy
-      if (ctrl.value.isPreviewPaused) {
-        await ctrl.resumePreview();
-      }
-      // tắt flash mặc định để tránh xung đột khi đổi lens
       await ctrl.setFlashMode(FlashMode.off);
       _zoomLevel = 1.0;
+      await _ensurePreviewRunning();
     } catch (e) {
       debugPrint('Camera initialize error: $e');
       await ctrl.dispose();
@@ -124,7 +116,6 @@ class _CaptureBodyState extends State<HomeScreen> with WidgetsBindingObserver {
     }
 
     setState(() {
-      _controller?.dispose();
       _controller = ctrl;
     });
   }
@@ -137,55 +128,18 @@ class _CaptureBodyState extends State<HomeScreen> with WidgetsBindingObserver {
     await _initSelectedCamera(_cameras[nextIndex]);
   }
 
-  Future<void> _capture() async {
-    final c = _controller;
-    if (c == null || !c.value.isInitialized) return;
-    if (_isCapturing || c.value.isTakingPicture) return;
-
-    _isCapturing = true;
-    try {
-      //  KHÔNG pausePreview ở đây (trừ khi máy bạn từng lỗi buffer)
-      // Nếu thật sự cần, chỉ dùng cho Android và nhớ resume trước khi push.
-
-      // 1) Chụp ảnh
-      final xfile = await c.takePicture();
-      final path = xfile.path;
-
-      // 2) Bảo đảm preview không bị paused trước khi điều hướng
-      if (c.value.isPreviewPaused) {
-        try {
-          await c.resumePreview();
-        } catch (_) {}
-      }
-
-      if (!mounted) return;
-
-      // 3) Đẩy màn SendToScreen sau frame hiện tại (tránh xung đột texture)
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        // không await để UI không bị chặn
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => SendToScreen(imagePath: path)),
-        );
-      });
-    } catch (e, s) {
-      debugPrint('capture error: $e\n$s');
-      // Có thể hiển thị snack nếu cần
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Không thể chụp ảnh')));
-      }
-    } finally {
-      _isCapturing = false;
-    }
-  }
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _ensurePreviewRunning();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
     final c = _controller;
-    if (c != null && c.value.isInitialized && c.value.isPreviewPaused) {
-      c.resumePreview();
+    if (c == null) return;
+    if (state == AppLifecycleState.resumed) {
+      _initSelectedCamera(c.description);
     }
   }
 
@@ -221,7 +175,15 @@ class _CaptureBodyState extends State<HomeScreen> with WidgetsBindingObserver {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  _RoundIcon(icon: Icons.chat_bubble_outline, onTap: () {}),
+                  _RoundIcon(
+                    icon: Icons.chat_bubble_outline,
+                    onTap: () => CameraHelper.goToMessages(
+                      context: context,
+                      controller: _controller,
+                      onReinitCamera: _initSelectedCamera,
+                    ),
+                  ),
+
                   const SizedBox(width: 1),
                   IconButton(
                     tooltip: 'Logout',
@@ -298,7 +260,13 @@ class _CaptureBodyState extends State<HomeScreen> with WidgetsBindingObserver {
                         icon: Icons.photo_library_outlined,
                         onTap: () {},
                       ),
-                      _ShutterButton(onTap: _capture),
+                      _ShutterButton(
+                        onTap: () => CameraHelper.capture(
+                          context: context,
+                          controller: _controller!,
+                          onReinitCamera: _initSelectedCamera,
+                        ),
+                      ),
                       _RoundIcon(
                         icon: Icons.cameraswitch_rounded,
                         onTap: _toggleCamera,
@@ -411,41 +379,6 @@ class _RoundIcon extends StatelessWidget {
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: Colors.white, size: 22),
-      ),
-    );
-  }
-}
-
-class _BadgeIcon extends StatelessWidget {
-  final IconData icon;
-  final bool enabled;
-  final bool isActive;
-  final VoidCallback? onTap;
-  const _BadgeIcon({
-    required this.icon,
-    this.enabled = true,
-    this.isActive = false,
-    this.onTap,
-  });
-  @override
-  Widget build(BuildContext context) {
-    return Opacity(
-      opacity: enabled ? 1 : 0.4,
-      child: GestureDetector(
-        onTap: enabled ? onTap : null,
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.black45,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white24),
-          ),
-          child: Icon(
-            icon,
-            color: isActive ? Colors.amber : Colors.white,
-            size: 18,
-          ),
-        ),
       ),
     );
   }

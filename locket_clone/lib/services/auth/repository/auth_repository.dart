@@ -4,8 +4,6 @@
 /// - Hợp nhất luồng "register -> login -> lấy account"
 /// - Ẩn chi tiết gọi API khỏi controller/UI
 
-import 'package:dio/dio.dart';
-
 import '../../../core/storage/secure_storage.dart';
 import '../data/datasources/auth_api.dart';
 import '../data/models/user_dto.dart';
@@ -15,7 +13,6 @@ abstract class AuthRepository {
   /// Đăng nhập: lưu AT, sau đó gọi /auth/account để lấy User đầy đủ.
   Future<ResLoginDTO> login(String email, String password);
 
-  /// Đăng ký xong đăng nhập luôn (để vào Home).
   Future<ResLoginDTO> registerThenLogin({
     required String email,
     required String password,
@@ -24,13 +21,10 @@ abstract class AuthRepository {
     String? imageUrl,
   });
 
-  /// Lấy thông tin người dùng hiện tại (sử dụng AT đã có).
   Future<UserDTO> getCurrentUser();
 
-  /// Gọi logout + xoá Access Token local.
   Future<void> logout();
 
-  /// Thử refresh thủ công (thường không cần vì interceptor đã làm).
   Future<ResLoginDTO> refresh();
 
   /// Kiểm tra có sẵn Access Token trong storage không.
@@ -40,9 +34,8 @@ abstract class AuthRepository {
 class AuthRepositoryImpl implements AuthRepository {
   final AuthApi _api;
   final SecureStorage _storage;
-  final Dio _dio;
 
-  AuthRepositoryImpl(this._api, this._storage, this._dio);
+  AuthRepositoryImpl(this._api, this._storage);
 
   @override
   Future<ResLoginDTO> login(String email, String password) async {

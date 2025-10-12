@@ -1,4 +1,3 @@
-// user_dto.dart
 class UserDTO {
   final int id;
   final String email;
