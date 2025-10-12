@@ -23,6 +23,7 @@ public class Post {
     private String caption;
     private String image;
     private Instant created_at;
+
     @Enumerated(EnumType.STRING)
     private visibilityEnum visibility;
 

@@ -1,13 +1,15 @@
 package SocialNetwork.SocialNetwork.domain.Response;
 
-import lombok.Builder;
-import lombok.Value;
+import lombok.*;
 
 import java.time.Instant;
 
 // FriendRequestItemDTO.java
 @Value
 @Builder
+@AllArgsConstructor
+@Getter
+@Setter
 public class FriendRequestBySender {
     Long requestId;
 
