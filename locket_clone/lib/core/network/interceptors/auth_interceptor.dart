@@ -11,16 +11,36 @@ class AuthInterceptor extends Interceptor {
 
   AuthInterceptor(this._storage);
 
+  // Danh sách các endpoint không cần token
+  static const _publicPaths = [
+    '/auth/login',
+    '/auth/register',
+    '/auth/refresh',
+    '/auth/forgot-password',
+  ];
+
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+  void onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
     try {
-      final token = await _storage.readAccessToken();
-      if (token != null && token.isNotEmpty) {
-        options.headers[AppEnv.authHeader] = 'Bearer $token';
+      // Kiểm tra xem có phải request public không
+      final isPublic = _publicPaths.any((p) => options.path.contains(p));
+
+      if (!isPublic) {
+        final token = await _storage.readAccessToken();
+        if (token != null && token.isNotEmpty) {
+          options.headers[AppEnv.authHeader] = 'Bearer $token';
+        }
+      } else {
+        // Đảm bảo không có header Authorization cho request public
+        options.headers.remove(AppEnv.authHeader);
       }
-    } catch (_) {
-      // Không chặn request nếu có lỗi đọc storage; cứ để đi tiếp.
+    } catch (e) {
+      // Không chặn request nếu có lỗi đọc storage
     }
+
     handler.next(options);
   }
 }
