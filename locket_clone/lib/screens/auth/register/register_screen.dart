@@ -85,15 +85,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        // **SỬA LỖI Ở ĐÂY:** Đưa Stack ra ngoài cùng để quản lý các lớp (layers)
         child: Stack(
           children: [
-            // Lớp 1: Nội dung form có thể cuộn
             SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Form(
-                  // Đưa Form vào trong để nó cuộn cùng nội dung
                   key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,7 +208,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ),
 
-            // Lớp 2: Nút quay lại, nằm đè lên trên và luôn có thể nhấn
             Positioned(
               top: 8,
               left: 12,

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:locket_clone/services/application/auth_controller.dart';
+import 'package:locket_clone/screens/auth/login/widgets/locket_field.dart';
+import 'package:locket_clone/theme/app_colors.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -9,28 +11,47 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final email = TextEditingController();
-  final pass = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+  final _emailCtl = TextEditingController();
+  final _passCtl = TextEditingController();
   bool _obscure = true;
+  bool _isLoginEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailCtl.addListener(_validateInput);
+    _passCtl.addListener(_validateInput);
+  }
 
   @override
   void dispose() {
-    email.dispose();
-    pass.dispose();
+    _emailCtl.removeListener(_validateInput);
+    _passCtl.removeListener(_validateInput);
+    _emailCtl.dispose();
+    _passCtl.dispose();
     super.dispose();
   }
 
-  Future<void> _signin() async {
-    if (!_formKey.currentState!.validate()) return;
-    final auth = context.read<AuthController>();
+  void _validateInput() {
+    final email = _emailCtl.text.trim();
+    final password = _passCtl.text.trim();
+    final isEmailValid = RegExp(r"^[^@\s]+@[^@\s]+\.[^@\s]+$").hasMatch(email);
 
-    // Chỉ cần gọi login. AuthController đã được tối ưu để cập nhật user state.
-    await auth.login(email.text.trim(), pass.text.trim());
+    final bool isEnabled =
+        email.isNotEmpty && password.isNotEmpty && isEmailValid;
+
+    if (isEnabled != _isLoginEnabled) {
+      setState(() {
+        _isLoginEnabled = isEnabled;
+      });
+    }
+  }
+
+  Future<void> _signin() async {
+    final auth = context.read<AuthController>();
+    await auth.login(_emailCtl.text.trim(), _passCtl.text.trim());
 
     if (!mounted) return;
-
-    // Nếu có lỗi, hiển thị SnackBar. AuthState sẽ không có user -> không qua được AuthGate.
     if (auth.error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -46,193 +67,166 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _signup() => Navigator.pushReplacementNamed(context, '/register');
+  void _signup() {
+    Navigator.of(context).pushNamed('/register');
+  }
 
   @override
   Widget build(BuildContext context) {
     final isLoading = context.watch<AuthController>().isLoading;
-    const amber = Colors.amber;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.background,
       body: SafeArea(
-        child: GestureDetector(
-          onTap: () => FocusScope.of(context).unfocus(),
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Logo / Title
-                  const Icon(Icons.camera_alt_rounded, size: 56, color: amber),
-                  const SizedBox(height: 10),
-                  const Text(
-                    'Locket',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-
-                  // Card container
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.04),
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: Colors.white12),
-                    ),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
-                          _LocketField(
-                            controller: email,
-                            hint: 'Email',
-                            keyboardType: TextInputType.emailAddress,
-                            validator: (v) {
-                              if (v == null || v.trim().isEmpty)
-                                return 'Nhập email';
-                              if (!RegExp(
-                                r"^[^@\s]+@[^@\s]+\.[^@\s]+",
-                              ).hasMatch(v))
-                                return 'Email không hợp lệ';
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 12),
-                          _LocketField(
-                            controller: pass,
-                            hint: 'Mật khẩu',
-                            obscureText: _obscure,
-                            validator: (v) => (v == null || v.length < 6)
-                                ? 'Tối thiểu 6 ký tự'
-                                : null,
-                            trailing: IconButton(
-                              splashRadius: 20,
-                              icon: Icon(
-                                _obscure
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                                color: Colors.white70,
-                              ),
-                              onPressed: () =>
-                                  setState(() => _obscure = !_obscure),
+                  Expanded(
+                    child: Center(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // 1. Logo
+                            Image.asset(
+                              'lib/assets/locket_app_icon.png',
+                              height: 64,
+                              width: 64,
                             ),
-                          ),
-                          const SizedBox(height: 18),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 54,
-                            child: ElevatedButton(
-                              onPressed: isLoading ? null : _signin,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: amber,
-                                disabledBackgroundColor: amber.withOpacity(0.6),
-                                foregroundColor: Colors.black,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
+                            const SizedBox(height: 16),
+                            const Text(
+                              'Đăng nhập',
+                              style: TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 28,
+                                fontWeight: FontWeight.w800,
                               ),
-                              child: isLoading
-                                  ? const SizedBox(
-                                      height: 22,
-                                      width: 22,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.black,
+                            ),
+                            const SizedBox(height: 28),
+                            // 2. Form container
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: AppColors.fieldBackground,
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: Column(
+                                children: [
+                                  LocketField(
+                                    controller: _emailCtl,
+                                    hint: 'Email',
+                                    keyboardType: TextInputType.emailAddress,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  LocketField(
+                                    controller: _passCtl,
+                                    hint: 'Mật khẩu',
+                                    obscureText: _obscure,
+                                    trailing: IconButton(
+                                      splashRadius: 20,
+                                      icon: Icon(
+                                        _obscure
+                                            ? Icons.visibility_off
+                                            : Icons.visibility,
+                                        color: AppColors.secondaryText,
                                       ),
-                                    )
-                                  : const Text(
-                                      'Đăng nhập',
+                                      onPressed: () =>
+                                          setState(() => _obscure = !_obscure),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 18),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 54,
+                                    child: ElevatedButton(
+                                      onPressed: isLoading || !_isLoginEnabled
+                                          ? null
+                                          : _signin,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.brandYellow,
+                                        disabledBackgroundColor:
+                                            AppColors.disabledButtonBackground,
+                                        foregroundColor: AppColors.buttonText,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            14,
+                                          ),
+                                        ),
+                                      ),
+                                      child: isLoading
+                                          ? const SizedBox(
+                                              height: 22,
+                                              width: 22,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: AppColors.buttonText,
+                                              ),
+                                            )
+                                          : const Text(
+                                              'Đăng nhập',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w800,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  TextButton(
+                                    onPressed: isLoading ? null : _signup,
+                                    child: const Text(
+                                      'Chưa có tài khoản? Đăng ký ngay',
                                       style: TextStyle(
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 16,
+                                        color: AppColors.textSecondary,
                                       ),
                                     ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          TextButton(
-                            onPressed: isLoading ? null : _signup,
-                            child: const Text(
-                              'Tạo tài khoản',
-                              style: TextStyle(color: Colors.white70),
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
-
-                  const SizedBox(height: 18),
-
-                  // Terms / footer
-                  const Text(
-                    'Bằng việc tiếp tục, bạn đồng ý với Điều khoản và Chính sách quyền riêng tư.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white38, fontSize: 12),
+                  // 3. Điều khoản dịch vụ ở dưới cùng
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 24.0, top: 16.0),
+                    child: Text(
+                      'Bằng việc tiếp tục, bạn đồng ý với Điều khoản và Chính sách của chúng tôi.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: AppColors.textHint, fontSize: 12),
+                    ),
                   ),
                 ],
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _LocketField extends StatelessWidget {
-  final TextEditingController controller;
-  final String hint;
-  final bool obscureText;
-  final TextInputType? keyboardType;
-  final String? Function(String?)? validator;
-  final Widget? trailing;
-  const _LocketField({
-    required this.controller,
-    required this.hint,
-    this.obscureText = false,
-    this.keyboardType,
-    this.validator,
-    this.trailing,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white12),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextFormField(
-              controller: controller,
-              obscureText: obscureText,
-              keyboardType: keyboardType,
-              validator: validator,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: hint,
-                hintStyle: const TextStyle(color: Colors.white38),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 16,
+            // 4. Nút quay lại luôn ở lớp trên cùng
+            Positioned(
+              top: 8,
+              left: 12,
+              child: Material(
+                color: Colors.transparent,
+                shape: const CircleBorder(),
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white10,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.arrow_back, color: Colors.white),
+                  ),
                 ),
               ),
             ),
-          ),
-          if (trailing != null) trailing!,
-        ],
+          ],
+        ),
       ),
     );
   }
