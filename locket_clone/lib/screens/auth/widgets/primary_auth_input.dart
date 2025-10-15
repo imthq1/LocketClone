@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:locket_clone/theme/app_colors.dart';
 
-class RoundedInput extends StatelessWidget {
-  const RoundedInput({
+class PrimaryAuthInput extends StatelessWidget {
+  final TextEditingController controller;
+  final String hintText;
+  final bool obscureText;
+  final TextInputType? keyboardType;
+  final Widget? suffixIcon;
+
+  const PrimaryAuthInput({
     super.key,
     required this.controller,
     required this.hintText,
     this.obscureText = false,
     this.keyboardType,
-    this.validator,
-    this.suffix,
+    this.suffixIcon,
   });
-
-  final TextEditingController controller;
-  final String hintText;
-  final bool obscureText;
-  final TextInputType? keyboardType;
-  final String? Function(String?)? validator;
-  final Widget? suffix;
 
   @override
   Widget build(BuildContext context) {
@@ -30,15 +28,14 @@ class RoundedInput extends StatelessWidget {
         fontSize: 18,
         fontWeight: FontWeight.w600,
       ),
-      validator: validator,
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: const TextStyle(
-          color: Color(0xFFD7D7D7),
+          color: AppColors.textHint,
           fontWeight: FontWeight.w400,
         ),
         filled: true,
-        fillColor: const Color(0xFF1E1E1E),
+        fillColor: AppColors.fieldBackground,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 22,
           vertical: 18,
@@ -51,7 +48,7 @@ class RoundedInput extends StatelessWidget {
           borderRadius: BorderRadius.circular(26),
           borderSide: const BorderSide(color: AppColors.brandYellow, width: 2),
         ),
-        suffixIcon: suffix,
+        suffixIcon: suffixIcon,
       ),
     );
   }

@@ -15,8 +15,8 @@ import 'services/data/datasources/post_api.dart';
 import 'services/application/post_controller.dart';
 import 'screens/auth/auth_gate.dart';
 import 'screens/home/home_screen.dart';
-import 'screens/auth/login/login_screen.dart';
-import 'screens/auth/register/register_screen.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/auth/register_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

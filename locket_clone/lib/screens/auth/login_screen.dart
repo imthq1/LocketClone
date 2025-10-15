@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:locket_clone/services/application/auth_controller.dart';
-import 'package:locket_clone/screens/auth/login/widgets/locket_field.dart';
 import 'package:locket_clone/theme/app_colors.dart';
+import 'package:locket_clone/screens/auth/widgets/primary_auth_button.dart';
+import 'package:locket_clone/screens/auth/widgets/primary_auth_input.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -36,10 +37,8 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = _emailCtl.text.trim();
     final password = _passCtl.text.trim();
     final isEmailValid = RegExp(r"^[^@\s]+@[^@\s]+\.[^@\s]+$").hasMatch(email);
-
     final bool isEnabled =
         email.isNotEmpty && password.isNotEmpty && isEmailValid;
-
     if (isEnabled != _isLoginEnabled) {
       setState(() {
         _isLoginEnabled = isEnabled;
@@ -90,7 +89,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // 1. Logo
                             Image.asset(
                               'lib/assets/locket_app_icon.png',
                               height: 64,
@@ -106,85 +104,42 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                             const SizedBox(height: 28),
-                            // 2. Form container
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: AppColors.fieldBackground,
-                                borderRadius: BorderRadius.circular(18),
+                            PrimaryAuthInput(
+                              controller: _emailCtl,
+                              hintText: 'Email',
+                              keyboardType: TextInputType.emailAddress,
+                            ),
+                            const SizedBox(height: 14),
+                            PrimaryAuthInput(
+                              controller: _passCtl,
+                              hintText: 'Mật khẩu',
+                              obscureText: _obscure,
+                              suffixIcon: IconButton(
+                                splashRadius: 20,
+                                icon: Icon(
+                                  _obscure
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                  color: AppColors.secondaryText,
+                                ),
+                                onPressed: () =>
+                                    setState(() => _obscure = !_obscure),
                               ),
-                              child: Column(
-                                children: [
-                                  LocketField(
-                                    controller: _emailCtl,
-                                    hint: 'Email',
-                                    keyboardType: TextInputType.emailAddress,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  LocketField(
-                                    controller: _passCtl,
-                                    hint: 'Mật khẩu',
-                                    obscureText: _obscure,
-                                    trailing: IconButton(
-                                      splashRadius: 20,
-                                      icon: Icon(
-                                        _obscure
-                                            ? Icons.visibility_off
-                                            : Icons.visibility,
-                                        color: AppColors.secondaryText,
-                                      ),
-                                      onPressed: () =>
-                                          setState(() => _obscure = !_obscure),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 18),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    height: 54,
-                                    child: ElevatedButton(
-                                      onPressed: isLoading || !_isLoginEnabled
-                                          ? null
-                                          : _signin,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppColors.brandYellow,
-                                        disabledBackgroundColor:
-                                            AppColors.disabledButtonBackground,
-                                        foregroundColor: AppColors.buttonText,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            14,
-                                          ),
-                                        ),
-                                      ),
-                                      child: isLoading
-                                          ? const SizedBox(
-                                              height: 22,
-                                              width: 22,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                color: AppColors.buttonText,
-                                              ),
-                                            )
-                                          : const Text(
-                                              'Đăng nhập',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.w800,
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  TextButton(
-                                    onPressed: isLoading ? null : _signup,
-                                    child: const Text(
-                                      'Chưa có tài khoản? Đăng ký ngay',
-                                      style: TextStyle(
-                                        color: AppColors.textSecondary,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                            ),
+                            const SizedBox(height: 24),
+                            PrimaryAuthButton(
+                              label: 'Đăng nhập',
+                              isLoading: isLoading,
+                              onPressed: _isLoginEnabled ? _signin : null,
+                            ),
+                            const SizedBox(height: 12),
+                            TextButton(
+                              onPressed: isLoading ? null : _signup,
+                              child: const Text(
+                                'Chưa có tài khoản? Đăng ký ngay',
+                                style: TextStyle(
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
                             ),
                           ],
@@ -192,7 +147,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  // 3. Điều khoản dịch vụ ở dưới cùng
                   Padding(
                     padding: const EdgeInsets.only(bottom: 24.0, top: 16.0),
                     child: Text(
@@ -204,7 +158,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
             ),
-            // 4. Nút quay lại luôn ở lớp trên cùng
             Positioned(
               top: 8,
               left: 12,
