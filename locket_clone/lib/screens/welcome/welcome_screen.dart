@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:locket_clone/screens/welcome/widgets/primary_btn.dart';
 import 'package:locket_clone/theme/app_colors.dart';
+import './widgets/ggSignIn_btn.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({
@@ -30,12 +31,11 @@ class WelcomeScreen extends StatelessWidget {
                 alignment: Alignment.center,
                 child: Image.asset(
                   phoneImageAsset,
-                  width: size.width * 2,
+                  width: size.width,
                   fit: BoxFit.contain,
                 ),
               ),
             ),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -61,9 +61,7 @@ class WelcomeScreen extends StatelessWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 12),
-
             const Text(
               'Ảnh trực tiếp từ bạn bè,\nngay trên màn hình chính',
               textAlign: TextAlign.center,
@@ -74,15 +72,22 @@ class WelcomeScreen extends StatelessWidget {
                 fontWeight: FontWeight.w500,
               ),
             ),
-
             const SizedBox(height: 38),
+
             PrimaryBtn(label: 'Tạo một tài khoản', onPressed: onSignUp),
+            const SizedBox(height: 16),
+
+            GoogleSignInButton(
+              onPressed: () {
+                print('Google Sign-In pressed');
+              },
+            ),
             const SizedBox(height: 8),
 
             TextButton(
               onPressed: onSignIn,
               child: const Text(
-                'Đăng nhập',
+                'Đăng nhập bằng email',
                 style: TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 16,
@@ -90,7 +95,6 @@ class WelcomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-
             const SizedBox(height: 24),
           ],
         ),
