@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:locket_clone/services/application/auth_controller.dart';
-import 'package:locket_clone/screens/home/home_screen.dart';
 
-/// Locket-like login screen
-/// - Dark UI, amber accent
-/// - Rounded fields, large primary button
-/// - Shows loading state using AuthController
-/// - On success: navigate to HomeScreen and prefetch current user
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
   @override
@@ -30,9 +24,13 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _signin() async {
     if (!_formKey.currentState!.validate()) return;
     final auth = context.read<AuthController>();
+
+    // Chỉ cần gọi login. AuthController đã được tối ưu để cập nhật user state.
     await auth.login(email.text.trim(), pass.text.trim());
 
     if (!mounted) return;
+
+    // Nếu có lỗi, hiển thị SnackBar. AuthState sẽ không có user -> không qua được AuthGate.
     if (auth.error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -40,15 +38,12 @@ class _LoginScreenState extends State<LoginScreen> {
           content: Text(auth.error!),
         ),
       );
-
       return;
     }
 
-    // Lấy luôn account để hiển thị tên trên Home (nếu login() chưa set)
-    await context.read<AuthController>().loadCurrentUser();
-
-    if (!mounted) return;
-    Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+    if (auth.user != null) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+    }
   }
 
   void _signup() => Navigator.pushReplacementNamed(context, '/register');
@@ -114,8 +109,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             controller: pass,
                             hint: 'Mật khẩu',
                             obscureText: _obscure,
-                            validator: (v) => (v == null || v.length == 1)
-                                ? 'Tối thiểu 4 ký tự'
+                            validator: (v) => (v == null || v.length < 6)
+                                ? 'Tối thiểu 6 ký tự'
                                 : null,
                             trailing: IconButton(
                               splashRadius: 20,
