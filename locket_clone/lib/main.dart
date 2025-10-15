@@ -11,18 +11,12 @@ import 'core/network/dio_client.dart';
 import 'services/data/datasources/auth_api.dart';
 import 'services/repository/auth_repository.dart';
 import 'services/application/auth_controller.dart';
-
-// >>> ADD: post layer imports
 import 'services/data/datasources/post_api.dart';
-
 import 'services/application/post_controller.dart';
-// <<<
-
 import 'screens/auth/auth_gate.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/auth/login/login_screen.dart';
 import 'screens/auth/register/register_screen.dart';
-import 'screens/auth/register/create_username_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -90,28 +84,6 @@ class LocketClone extends StatelessWidget {
               '/login': (_) => const LoginScreen(),
               '/register': (_) => const RegisterScreen(),
               '/chat': (_) => const MessagesScreen(),
-            },
-            onGenerateRoute: (settings) {
-              if (settings.name == CreateUsernameScreen.route) {
-                final args = settings.arguments;
-                if (args is CreateUsernameArgs) {
-                  return MaterialPageRoute(
-                    builder: (_) => const CreateUsernameScreen(),
-                    settings: RouteSettings(
-                      name: CreateUsernameScreen.route,
-                      arguments: args,
-                    ),
-                  );
-                }
-                return MaterialPageRoute(
-                  builder: (_) => const Scaffold(
-                    body: Center(
-                      child: Text('Thiếu tham số cho CreateUsernameScreen'),
-                    ),
-                  ),
-                );
-              }
-              return null;
             },
           ),
         );
