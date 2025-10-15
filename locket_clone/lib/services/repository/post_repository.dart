@@ -1,6 +1,6 @@
 // lib/services/auth/data/repository/post_repository.dart
-import 'package:locket_clone/services/auth/data/datasources/post_api.dart';
-import 'package:locket_clone/services/auth/data/models/post_dto.dart';
+import 'package:locket_clone/services/data/datasources/post_api.dart';
+import 'package:locket_clone/services/data/models/post_dto.dart';
 
 abstract class PostRepository {
   Future<String> uploadImage(String filePath, {String folder});

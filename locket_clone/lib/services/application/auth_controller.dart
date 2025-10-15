@@ -14,9 +14,9 @@
 /// - Interceptor đã xử lý auto-refresh AT khi 401, nên controller không cần lo phần này.
 
 import 'package:flutter/foundation.dart';
-import 'package:locket_clone/services/auth/data/models/res_login_dto.dart';
+import 'package:locket_clone/services/data/models/res_login_dto.dart';
 import '../repository/auth_repository.dart';
-import '../../auth/data/models/user_dto.dart';
+import '../data/models/user_dto.dart';
 
 class AuthController extends ChangeNotifier {
   final AuthRepository _repo;

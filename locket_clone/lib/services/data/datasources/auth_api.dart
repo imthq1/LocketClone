@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'dart:convert';
-import '../../data/models/user_dto.dart';
-import '../../data/models/res_login_dto.dart';
+import '../models/user_dto.dart';
+import '../models/res_login_dto.dart';
 
 class ApiException implements Exception {
   final String message;

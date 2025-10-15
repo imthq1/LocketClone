@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:locket_clone/screens/home/send_capture.dart';
-import 'package:locket_clone/services/auth/application/friends_controller.dart';
+import 'package:locket_clone/services/application/friends_controller.dart';
 import 'package:provider/provider.dart';
 
 /// Helper dùng để xử lý camera & điều hướng.

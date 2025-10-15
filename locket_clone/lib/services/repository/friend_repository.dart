@@ -1,5 +1,5 @@
-import 'package:locket_clone/services/auth/data/datasources/friend_api.dart';
-import 'package:locket_clone/services/auth/data/models/user_dto.dart';
+import 'package:locket_clone/services/data/datasources/friend_api.dart';
+import 'package:locket_clone/services/data/models/user_dto.dart';
 
 abstract class FriendRepository {
   Future<List<UserDTO>> getFriends();

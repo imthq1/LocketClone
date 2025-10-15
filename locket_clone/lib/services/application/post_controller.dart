@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:locket_clone/services/auth/repository/post_repository.dart';
+import 'package:locket_clone/services/repository/post_repository.dart';
 import '../data/models/post_dto.dart';
 
 class PostController extends ChangeNotifier {

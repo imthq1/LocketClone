@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:locket_clone/services/auth/application/auth_controller.dart';
-import 'package:locket_clone/services/auth/application/post_controller.dart';
-import 'package:locket_clone/services/auth/data/models/post_dto.dart';
+import 'package:locket_clone/services/application/auth_controller.dart';
+import 'package:locket_clone/services/application/post_controller.dart';
+import 'package:locket_clone/services/data/models/post_dto.dart';
 import 'package:provider/provider.dart';
 
 

@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:locket_clone/services/auth/data/models/user_dto.dart';
-import 'package:locket_clone/services/auth/repository/friend_repository.dart';
+import 'package:locket_clone/services/data/models/user_dto.dart';
+import 'package:locket_clone/services/repository/friend_repository.dart';
 
 class FriendsController extends ChangeNotifier {
   final FriendRepository _repo;

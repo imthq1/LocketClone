@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:locket_clone/services/auth/application/friends_controller.dart';
+import 'package:locket_clone/services/application/friends_controller.dart';
 import 'package:provider/provider.dart';
-import 'package:locket_clone/services/auth/data/models/user_dto.dart';
+import 'package:locket_clone/services/data/models/user_dto.dart';
 
 class MessagesScreen extends StatelessWidget {
   const MessagesScreen({super.key});

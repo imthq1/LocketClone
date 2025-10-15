@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:locket_clone/screens/home/messages_screen.dart';
-import 'package:locket_clone/services/auth/application/friends_controller.dart';
-import 'package:locket_clone/services/auth/data/datasources/friend_api.dart';
-import 'package:locket_clone/services/auth/repository/friend_repository.dart';
-import 'package:locket_clone/services/auth/repository/post_repository.dart';
+import 'package:locket_clone/services/application/friends_controller.dart';
+import 'package:locket_clone/services/data/datasources/friend_api.dart';
+import 'package:locket_clone/services/repository/friend_repository.dart';
+import 'package:locket_clone/services/repository/post_repository.dart';
 import 'package:provider/provider.dart';
 
 import 'core/storage/secure_storage.dart';
 import 'core/network/dio_client.dart';
-import 'services/auth/data/datasources/auth_api.dart';
-import 'services/auth/repository/auth_repository.dart';
-import 'services/auth/application/auth_controller.dart';
+import 'services/data/datasources/auth_api.dart';
+import 'services/repository/auth_repository.dart';
+import 'services/application/auth_controller.dart';
 
 // >>> ADD: post layer imports
-import 'services/auth/data/datasources/post_api.dart';
+import 'services/data/datasources/post_api.dart';
 
-import 'services/auth/application/post_controller.dart';
+import 'services/application/post_controller.dart';
 // <<<
 
 import 'screens/auth/auth_gate.dart';

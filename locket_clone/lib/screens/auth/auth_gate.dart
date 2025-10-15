@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:locket_clone/screens/home/home_screen.dart';
 import 'package:locket_clone/screens/welcome/welcome_screen.dart';
-import 'package:locket_clone/services/auth/application/auth_controller.dart';
+import 'package:locket_clone/services/application/auth_controller.dart';
 
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});

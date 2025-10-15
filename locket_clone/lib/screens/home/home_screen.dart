@@ -3,7 +3,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:locket_clone/screens/helpers/camera_helper.dart';
 import 'package:provider/provider.dart';
-import 'package:locket_clone/services/auth/application/auth_controller.dart';
+import 'package:locket_clone/services/application/auth_controller.dart';
 
 /// NOTE
 /// - Add `camera` to pubspec.yaml
