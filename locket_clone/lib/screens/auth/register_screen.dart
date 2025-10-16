@@ -78,9 +78,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (auth.user != null) {
       Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
     } else if (auth.error != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(auth.error!)));
+      String errorMessage = auth.error!;
+      final apiErrorPrefix = RegExp(r'ApiException\(\d*\): ');
+      errorMessage = errorMessage.replaceFirst(apiErrorPrefix, '');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: AppColors.error.withValues(alpha: 0.9),
+        ),
+      );
     }
   }
 

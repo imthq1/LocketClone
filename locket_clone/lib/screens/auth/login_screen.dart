@@ -52,10 +52,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (!mounted) return;
     if (auth.error != null) {
+      // String errorMessage = auth.error!;
+      // final apiErrorPrefix = RegExp(r'ApiException\(\d*\): ');
+      // errorMessage = errorMessage.replaceFirst(apiErrorPrefix, '');
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
-          content: Text(auth.error!),
+          content: Text("Tài khoản không tồn tại hoặc mật khẩu không đúng"),
+          backgroundColor: AppColors.error.withValues(alpha: 0.9),
         ),
       );
       return;
