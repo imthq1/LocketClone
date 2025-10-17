@@ -57,16 +57,19 @@ public class User {
             fetch = FetchType.LAZY
     )
     @ToString.Exclude
+    @JsonIgnore
     private List<Session> sessions = new ArrayList<>();
 
     // Các yêu cầu kết bạn do user này GỬI
     @OneToMany(mappedBy = "requester", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
+    @JsonIgnore
     private List<FriendRequest> friendRequestsSent = new ArrayList<>();
 
     // Các yêu cầu kết bạn do user này NHẬN
     @OneToMany(mappedBy = "addressee", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
+    @JsonIgnore
     private List<FriendRequest> friendRequestsReceived = new ArrayList<>();
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)

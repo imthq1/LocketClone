@@ -35,7 +35,6 @@ public class AuthController {
     private final SecurityUtil securityUtil;
     private final SessionService sessionService;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
-    // Tên cookie refresh token (cố định đường dẫn để chỉ gửi lên /auth/refresh & /auth/logout)
     private static final String RT_COOKIE = "refresh_token";
     private static final String RT_PATH   = "/api/auth";
 

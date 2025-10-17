@@ -1,5 +1,6 @@
 package SocialNetwork.SocialNetwork.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
@@ -26,6 +27,7 @@ public class Session {
     @JoinColumn(name = "user_id", nullable = false,
             foreignKey = @ForeignKey(name = "fk_sessions_user"))
     @ToString.Exclude
+    @JsonBackReference("user_session")
     private User user;
 
     @Column(length = 255)
