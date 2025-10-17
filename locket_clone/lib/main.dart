@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:locket_clone/screens/home/messages_screen.dart';
+import 'package:locket_clone/services/application/chat_controller.dart';
 import 'package:locket_clone/services/application/friends_controller.dart';
+import 'package:locket_clone/services/data/datasources/chat_api.dart';
 import 'package:locket_clone/services/data/datasources/friend_api.dart';
+import 'package:locket_clone/services/data/models/chat_repository.dart';
 import 'package:locket_clone/services/repository/friend_repository.dart';
 import 'package:locket_clone/services/repository/post_repository.dart';
 import 'package:provider/provider.dart';
@@ -27,7 +30,14 @@ class LocketClone extends StatelessWidget {
   const LocketClone({super.key});
 
   // Khởi tạo cả AuthController và PostController dùng chung 1 Dio
-  Future<({AuthController auth, PostController post, FriendsController friend})>
+  Future<
+    ({
+      AuthController auth,
+      PostController post,
+      FriendsController friend,
+      ChatController chat,
+    })
+  >
   _initControllers() async {
     final storage = SecureStorage();
     final dio = await DioClient.create(storage);
@@ -50,13 +60,22 @@ class LocketClone extends StatelessWidget {
     final friendRepo = FriendRepositoryImpl(friendApi);
     final friendCtrl = FriendsController(friendRepo);
 
-    return (auth: authCtrl, post: postCtrl, friend: friendCtrl);
+    final chatApi = ChatApi(dio);
+    final chatRepo = ChatRepositoryImpl(chatApi);
+    final chatCtrl = ChatController(chatRepo);
+
+    return (auth: authCtrl, post: postCtrl, friend: friendCtrl, chat: chatCtrl);
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<
-      ({AuthController auth, PostController post, FriendsController friend})
+      ({
+        AuthController auth,
+        PostController post,
+        FriendsController friend,
+        ChatController chat,
+      })
     >(
       future: _initControllers(),
       builder: (context, snapshot) {
@@ -75,6 +94,7 @@ class LocketClone extends StatelessWidget {
             ChangeNotifierProvider<FriendsController>.value(
               value: ctrls.friend,
             ),
+            ChangeNotifierProvider<ChatController>.value(value: ctrls.chat),
           ],
           child: MaterialApp(
             debugShowCheckedModeBanner: false,

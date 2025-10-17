@@ -5,6 +5,7 @@ import 'package:locket_clone/services/data/models/post_dto.dart';
 abstract class PostRepository {
   Future<String> uploadImage(String filePath, {String folder});
   Future<PostDTO> createPost(PostCreateDTO dto);
+  Future<FeedPageDTO> getFeed({int page, int size});
 
   /// Tiện ích: upload file rồi tạo post một lèo.
   Future<PostDTO> createFromFile({
@@ -23,6 +24,11 @@ class PostRepositoryImpl implements PostRepository {
   @override
   Future<String> uploadImage(String filePath, {String folder = 'locket'}) {
     return _api.uploadImage(filePath: filePath, folder: folder);
+  }
+
+  @override
+  Future<FeedPageDTO> getFeed({int page = 0, int size = 20}) {
+    return _api.getFeed(page: page, size: size);
   }
 
   @override

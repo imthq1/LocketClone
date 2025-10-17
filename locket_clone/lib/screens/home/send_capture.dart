@@ -5,7 +5,6 @@ import 'package:locket_clone/services/application/post_controller.dart';
 import 'package:locket_clone/services/data/models/post_dto.dart';
 import 'package:provider/provider.dart';
 
-
 class SendToScreen extends StatefulWidget {
   final String imagePath;
   final List<Recipient> initialRecipients;
@@ -19,7 +18,6 @@ class SendToScreen extends StatefulWidget {
   State<SendToScreen> createState() => _SendToScreenState();
 }
 
-/// Build recipients from API (AuthController.user.friend), always prepend "All".
 List<Recipient> _buildRecipients(AuthController auth) {
   final listFriend = auth.user?.friend;
 
@@ -28,17 +26,13 @@ List<Recipient> _buildRecipients(AuthController auth) {
   ];
 
   if (listFriend == null || listFriend.friends.isEmpty) {
-    return items; // only "All" when no data
+    return items;
   }
 
   items.addAll(
     listFriend.friends.map((u) {
       final name = (u.fullname.isNotEmpty) ? u.fullname : (u.email);
-      return Recipient(
-        id: u.id.toString(),
-        name: name,
-        avatarUrl: u.image, // can be null -> CircleAvatar fallback
-      );
+      return Recipient(id: u.id.toString(), name: name, avatarUrl: u.image);
     }),
   );
   return items;
@@ -69,7 +63,7 @@ class _SendToScreenState extends State<SendToScreen> {
         _selected.add(r.id);
       }
       _selected.remove('all');
-      if (_selected.isEmpty) _selected = {'all'}; // never empty
+      if (_selected.isEmpty) _selected = {'all'};
     });
   }
 
@@ -160,6 +154,8 @@ class _SendToScreenState extends State<SendToScreen> {
     if (!mounted) return;
 
     if (created != null) {
+      await context.read<PostController>().refresh();
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Đã đăng bài #${created.id}')));
@@ -232,7 +228,6 @@ class _SendToScreenState extends State<SendToScreen> {
                               fit: BoxFit.cover,
                             ),
 
-                            // Message pill pinned to bottom center like Locket
                             Positioned(
                               left: 0,
                               right: 0,
@@ -256,7 +251,7 @@ class _SendToScreenState extends State<SendToScreen> {
                                           ? 'Add a message'
                                           : _message!,
                                       textAlign: TextAlign.center,
-                                      maxLines: 2, // prevent overflow
+                                      maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
                                         color: Colors.white,

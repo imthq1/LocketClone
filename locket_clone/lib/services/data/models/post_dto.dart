@@ -26,8 +26,12 @@ class PostDTO {
   final int id;
   final String caption;
   final String image;
-  final String visibility;
+  final String visibility; // "friend" | "public" | "private"...
   final DateTime? createdAt;
+
+  final int? authorId;
+  final String? authorEmail;
+  final String? authorFullname;
 
   PostDTO({
     required this.id,
@@ -35,6 +39,9 @@ class PostDTO {
     required this.image,
     required this.visibility,
     this.createdAt,
+    this.authorId,
+    this.authorEmail,
+    this.authorFullname,
   });
 
   factory PostDTO.fromJson(Map<String, dynamic> json) => PostDTO(
@@ -42,8 +49,46 @@ class PostDTO {
     caption: json['caption'] as String? ?? '',
     image: json['image'] as String? ?? '',
     visibility: json['visibility'] as String? ?? 'PUBLIC',
-    createdAt: json['created_at'] != null
-        ? DateTime.tryParse(json['created_at'] as String)
+    createdAt: json['createdAt'] != null
+        ? DateTime.tryParse(json['createdAt'] as String)
+        : (json['created_at'] != null
+              ? DateTime.tryParse(json['created_at'] as String)
+              : null),
+    authorId: (json['authorId'] is num)
+        ? (json['authorId'] as num).toInt()
         : null,
+    authorEmail: json['authorEmail'] as String?,
+    authorFullname: json['authorFullname'] as String?,
   );
+}
+
+class FeedPageDTO {
+  final int size;
+  final int page;
+  final int totalPages;
+  final int totalElements;
+  final List<PostDTO> data;
+
+  const FeedPageDTO({
+    required this.size,
+    required this.page,
+    required this.totalPages,
+    required this.totalElements,
+    required this.data,
+  });
+
+  factory FeedPageDTO.fromJson(Map<String, dynamic> json) {
+    final items = (json['data'] as List<dynamic>? ?? const [])
+        .whereType<Map<String, dynamic>>()
+        .map(PostDTO.fromJson)
+        .toList();
+
+    return FeedPageDTO(
+      size: (json['size'] as num?)?.toInt() ?? items.length,
+      page: (json['page'] as num?)?.toInt() ?? 0,
+      totalPages: (json['totalPages'] as num?)?.toInt() ?? 1,
+      totalElements: (json['totalElements'] as num?)?.toInt() ?? items.length,
+      data: items,
+    );
+  }
 }

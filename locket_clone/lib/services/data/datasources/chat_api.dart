@@ -1,19 +1,14 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import '../models/post_dto.dart';
+import 'package:locket_clone/services/data/datasources/auth_api.dart';
+import 'package:locket_clone/services/data/models/chat_dto.dart';
 
-class ApiException implements Exception {
-  final String message;
-  final int? status;
-  ApiException(this.message, {this.status});
-  @override
-  String toString() => 'ApiException($status): $message';
-}
 
-class PostApi {
+class ChatApi {
   final Dio _dio;
-  PostApi(this._dio);
+  ChatApi(this._dio);
 
+  // ----- Helpers (giữ y hệt cách của AuthApi) -----
   Map<String, dynamic> _unwrap(dynamic raw) {
     dynamic decoded = raw;
     if (raw is String) {
@@ -54,52 +49,35 @@ class PostApi {
     return ApiException(message, status: status);
   }
 
-  /// POST /upload/image  -> {"name": "...", "url": "locket/xxx"}
-  Future<String> uploadImage({
-    required String filePath,
-    String folder = 'locket',
-  }) async {
-    try {
-      final form = FormData.fromMap({
-        'folder': folder,
-        'file': await MultipartFile.fromFile(filePath),
-      });
-      final res = await _dio.post(
-        '/upload/image',
-        data: form,
-        options: Options(contentType: 'multipart/form-data'),
-      );
-      final json = _unwrap(res.data);
-      final publicId = json['url'] as String?;
-      if (publicId == null || publicId.isEmpty) {
-        throw ApiException('Upload thành công nhưng thiếu trường url');
-      }
-      return publicId;
-    } on DioException catch (e) {
-      throw _asApiException(e);
-    }
-  }
-
-  /// POST /post
-  Future<PostDTO> createPost(PostCreateDTO dto) async {
-    try {
-      final res = await _dio.post('/post', data: dto.toJson());
-      final json = _unwrap(res.data);
-      return PostDTO.fromJson(json);
-    } on DioException catch (e) {
-      throw _asApiException(e);
-    }
-  }
-
-  /// GET /api/v1/feed?page=&size=
-  Future<FeedPageDTO> getFeed({int page = 0, int size = 20}) async {
+  Future<ConversationDTO> getOrCreateConversation(String emailRq) async {
     try {
       final res = await _dio.get(
-        '/feed',
-        queryParameters: {'page': page, 'size': size},
+        '/messageConversation',
+        queryParameters: {'emailRq': emailRq},
       );
       final json = _unwrap(res.data);
-      return FeedPageDTO.fromJson(json);
+      return ConversationDTO.fromJson(json);
+    } on DioException catch (e) {
+      throw _asApiException(e);
+    }
+  }
+
+  Future<MessageDTO> sendMessage({
+    required int conversationId,
+    required int senderId,
+    required String content,
+    String? image,
+  }) async {
+    try {
+      final body = {
+        'conversationId': conversationId,
+        'senderId': senderId,
+        'content': content,
+        if (image != null) 'image': image,
+      };
+      final res = await _dio.post('/message/send', data: body);
+      final json = _unwrap(res.data);
+      return MessageDTO.fromJson(json);
     } on DioException catch (e) {
       throw _asApiException(e);
     }

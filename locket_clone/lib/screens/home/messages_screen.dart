@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:locket_clone/screens/home/chat_screen.dart';
 import 'package:locket_clone/services/application/friends_controller.dart';
-import 'package:provider/provider.dart';
+import 'package:locket_clone/services/data/models/chat_dto.dart';
 import 'package:locket_clone/services/data/models/user_dto.dart';
+import 'package:provider/provider.dart';
 
 class MessagesScreen extends StatelessWidget {
   const MessagesScreen({super.key});
@@ -22,7 +24,10 @@ class MessagesScreen extends StatelessWidget {
         centerTitle: true,
         title: const Text(
           'Messages',
-          style: TextStyle(color: Color.fromARGB(255, 156, 129, 129), fontWeight: FontWeight.w600),
+          style: TextStyle(
+            color: Color.fromARGB(255, 156, 129, 129),
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       body: RefreshIndicator(
@@ -95,7 +100,20 @@ class _ChatRow extends StatelessWidget {
 
     return ListTile(
       onTap: () {
-        // TODO: mở màn hình chat với user.id
+        final partner = ChatUserDTO(
+          id: user.id,
+          email: user.email,
+          fullname: user.fullname,
+          imageUrl: user.image,
+        );
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                ChatScreen(emailRq: user.email, partnerPrefill: partner),
+          ),
+        );
       },
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       leading: Container(
@@ -132,18 +150,14 @@ class _ChatRow extends StatelessWidget {
         ),
       ),
       subtitle: const Text(
-        'Say hi 👋', // chưa có lastMessage từ API
+        'Say hi 👋',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(color: Colors.white60, fontSize: 14),
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
-        children: const [
-          // Placeholder ngày giờ (chưa có field time từ API)
-          // Text('4 Jun', style: TextStyle(color: Colors.white38, fontSize: 12)),
-          Icon(Icons.chevron_right, color: Colors.white38),
-        ],
+        children: const [Icon(Icons.chevron_right, color: Colors.white38)],
       ),
     );
   }

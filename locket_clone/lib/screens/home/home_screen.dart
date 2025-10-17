@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:locket_clone/screens/helpers/camera_helper.dart';
+import 'package:locket_clone/screens/home/history_row.dart';
+import 'package:locket_clone/services/application/post_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:locket_clone/services/application/auth_controller.dart';
 
@@ -37,6 +39,14 @@ class _CaptureBodyState extends State<HomeScreen> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _initCamera();
+
+    // 🔹 preload feed (không chặn UI)
+    Future.microtask(() {
+      final feed = context.read<PostController>();
+      if (feed.items.isEmpty && !feed.isLoading) {
+        feed.load(size: 20);
+      }
+    });
   }
 
   @override
@@ -274,7 +284,7 @@ class _CaptureBodyState extends State<HomeScreen> with WidgetsBindingObserver {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const _HistoryRow(),
+                  const HistoryRow(),
                 ],
               ),
             ),
@@ -433,41 +443,6 @@ class _ShutterButton extends StatelessWidget {
             color: Colors.white,
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _HistoryRow extends StatelessWidget {
-  const _HistoryRow();
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {},
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              width: 32,
-              height: 32,
-              color: Colors.white24,
-              child: const Icon(Icons.image, color: Colors.white, size: 18),
-            ),
-          ),
-          const SizedBox(width: 10),
-          const Text(
-            'History',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(width: 6),
-          const Icon(Icons.expand_more, color: Colors.white70, size: 20),
-        ],
       ),
     );
   }
