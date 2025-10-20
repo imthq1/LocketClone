@@ -1,103 +1,79 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:locket_clone/services/data/models/chat_dto.dart';
 import 'package:locket_clone/services/data/models/chat_repository.dart';
-import 'package:locket_clone/services/websocket/websocket_service.dart';
-import 'package:stomp_dart_client/stomp_dart_client.dart';
-import '../data/models/chat_dto.dart';
 
 class ChatController extends ChangeNotifier {
   final ChatRepository _repo;
   ChatController(this._repo);
 
-  ConversationDTO? _conversation;
-  bool _isLoading = false;
-  String? _error;
-  StompUnsubscribe? _subscription;
+  bool isLoading = false;
+  ConversationDTO? conversation;
 
-  ConversationDTO? get conversation => _conversation;
-  bool get isLoading => _isLoading;
-  String? get error => _error;
+  /// StreamController phát id của conversation hiện tại
+  final StreamController<int?> _conversationIdCtrl =
+      StreamController<int?>.broadcast();
 
-  void _setLoading(bool v) {
-    _isLoading = v;
+  /// Stream để UI (ChatScreen) có thể listen
+  Stream<int?> get conversationStream => _conversationIdCtrl.stream;
+
+  /// Cập nhật conversation và emit id ra stream
+  void _setConversation(ConversationDTO? conv) {
+    conversation = conv;
+    if (conv != null) {
+      _conversationIdCtrl.add(conv.id);
+    } else {
+      _conversationIdCtrl.add(null);
+    }
     notifyListeners();
   }
 
-  void _setError(String? msg) {
-    _error = msg;
+  /// Load conversation theo email đối phương
+  Future<void> loadConversationByEmail(String email) async {
+    isLoading = true;
     notifyListeners();
-  }
-
-  void _setConversation(ConversationDTO? c) {
-    _conversation = c;
-    notifyListeners();
-  }
-
-  Future<void> loadConversationByEmail(String emailRq) async {
-    _setError(null);
-    _setLoading(true);
     try {
-      final conv = await _repo.getOrCreateConversation(emailRq);
+      final conv = await _repo.getOrCreateConversation(email);
       _setConversation(conv);
-
-      WebSocketService.I.connect(
-        url: 'ws://10.0.2.2:8080/ws',
-        onConnected: () {
-          _subscribeTopic();
-        },
-        onError: (e, st) {
-          _setError(e.toString());
-        },
-      );
-
-      // Nếu đã connected sẵn → subscribe luôn
-      if (WebSocketService.I.isConnected) {
-        _subscribeTopic();
-      }
     } catch (e) {
-      _setError(e.toString());
+      debugPrint('loadConversationByEmail error: $e');
     } finally {
-      _setLoading(false);
+      isLoading = false;
+      notifyListeners();
     }
   }
 
-  void _subscribeTopic() {
-    _subscription?.call();
-    if (_conversation == null) return;
-
-    final topic = '/topic/conversations.${_conversation!.id}';
-    _subscription = WebSocketService.I.subscribeTopic(topic, (json) {
-      final msg = MessageDTO.fromJson(json);
-      final updated = ConversationDTO(
-        id: _conversation!.id,
-        createdAt: _conversation!.createdAt,
-        updatedAt: DateTime.now(),
-        user1: _conversation!.user1,
-        user2: _conversation!.user2,
-        messages: [..._conversation!.messages, msg],
-      );
-      _setConversation(updated);
-    });
-  }
-
+  /// Gửi tin nhắn REST fallback (nếu WS chưa kết nối)
   Future<void> sendMessage({
     required int senderId,
     required String content,
     String? image,
   }) async {
-    if (_conversation == null) {
-      _setError('Chưa có hội thoại.');
-      return;
-    }
+    if (conversation == null) return;
+    final msg = await _repo.sendMessage(
+      conversationId: conversation!.id,
+      senderId: senderId,
+      content: content,
+      image: image,
+    );
 
-    WebSocketService.I.send('/app/conversations/${_conversation!.id}/send', {
-      'senderId': senderId,
-      'content': content,
-      'image': image,
-    });
+    // thêm tin nhắn mới vào conversation hiện tại
+    final list = [...conversation!.messages, msg];
+    conversation = conversation!.copyWith(messages: list);
+    notifyListeners();
   }
 
-  void disposeSocket() {
-    _subscription?.call();
-    _subscription = null;
+  /// Khi WS nhận được tin mới → thêm vào danh sách
+  void appendIncomingMessage(MessageDTO dto) {
+    if (conversation == null) return;
+    final list = [...conversation!.messages, dto];
+    conversation = conversation!.copyWith(messages: list);
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _conversationIdCtrl.close();
+    super.dispose();
   }
 }

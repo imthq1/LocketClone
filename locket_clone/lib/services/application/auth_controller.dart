@@ -46,14 +46,9 @@ class AuthController extends ChangeNotifier {
     try {
       final loginRes = await _repo.login(email, password);
       _setResLogin(loginRes);
-      final userInfo = loginRes.userLogin;
-      _setUser(
-        UserDTO(
-          id: userInfo.id,
-          email: userInfo.email,
-          fullname: userInfo.fullname,
-        ),
-      );
+
+      final u = await _repo.getCurrentUser();
+      _setUser(u);
     } catch (e) {
       _setError(e.toString());
       _setUser(null);
@@ -108,7 +103,6 @@ class AuthController extends ChangeNotifier {
       if (!hasAT) {
         _setUser(null);
       } else {
-        // lấy thông tin user đầy đủ, bao gồm cả list friends.
         final u = await _repo.getCurrentUser();
         _setUser(u);
       }

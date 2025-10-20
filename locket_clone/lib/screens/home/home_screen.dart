@@ -326,12 +326,10 @@ class _RoundAvatar extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white24),
-        image: const DecorationImage(
-          fit: BoxFit.cover,
-          image: AssetImage(
-            'assets/sample_avatar.jpg',
-          ), // replace with NetworkImage if you have
-        ),
+        // image: const DecorationImage(
+        //   fit: BoxFit.cover,
+        //   image: AssetImage('assets/sample_avatar.jpg'),
+        // ),
       ),
     );
   }
