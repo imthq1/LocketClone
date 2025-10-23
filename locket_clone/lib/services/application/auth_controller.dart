@@ -47,8 +47,14 @@ class AuthController extends ChangeNotifier {
       final loginRes = await _repo.login(email, password);
       _setResLogin(loginRes);
 
-      final u = await _repo.getCurrentUser();
-      _setUser(u);
+      final userInfo = loginRes.userLogin;
+      _setUser(
+        UserDTO(
+          id: userInfo.id,
+          email: userInfo.email,
+          fullname: userInfo.fullname,
+        ),
+      );
     } catch (e) {
       _setError(e.toString());
       _setUser(null);
