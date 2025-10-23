@@ -75,6 +75,10 @@ class _LoginScreenState extends State<LoginScreen> {
     Navigator.of(context).pushNamed('/register');
   }
 
+  void _forgotPassword() {
+    Navigator.of(context).pushNamed('/forgot-password');
+  }
+
   @override
   Widget build(BuildContext context) {
     final isLoading = context.watch<AuthController>().isLoading;
@@ -94,14 +98,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Image.asset(
-                              'lib/assets/locket_app_icon.png',
-                              height: 64,
-                              width: 64,
-                            ),
-                            const SizedBox(height: 16),
+                            // Image.asset(
+                            //   'lib/assets/locket_app_icon.png',
+                            //   height: 64,
+                            //   width: 64,
+                            // ),
+                            // const SizedBox(height: 16),
                             const Text(
-                              'Đăng nhập',
+                              'Chào mừng bạn trở lại',
                               style: TextStyle(
                                 color: AppColors.textPrimary,
                                 fontSize: 28,
@@ -111,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: 28),
                             PrimaryAuthInput(
                               controller: _emailCtl,
-                              hintText: 'Email',
+                              hintText: 'your-mail@gmail.com',
                               keyboardType: TextInputType.emailAddress,
                             ),
                             const SizedBox(height: 14),
@@ -131,7 +135,26 @@ class _LoginScreenState extends State<LoginScreen> {
                                     setState(() => _obscure = !_obscure),
                               ),
                             ),
-                            const SizedBox(height: 24),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: isLoading ? null : _forgotPassword,
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Quên mật khẩu?',
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
                             PrimaryAuthButton(
                               label: 'Đăng nhập',
                               isLoading: isLoading,

@@ -20,6 +20,7 @@ import 'screens/auth/auth_gate.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
+import 'screens/auth/forgot_password_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,7 +30,6 @@ void main() {
 class LocketClone extends StatelessWidget {
   const LocketClone({super.key});
 
-  // Khởi tạo cả AuthController và PostController dùng chung 1 Dio
   Future<
     ({
       AuthController auth,
@@ -47,7 +47,7 @@ class LocketClone extends StatelessWidget {
     final authRepo = AuthRepositoryImpl(
       authApi,
       storage,
-    ); // giữ nguyên theo code bạn đang dùng
+    );
     final authCtrl = AuthController(authRepo);
 
     // Post
@@ -104,6 +104,7 @@ class LocketClone extends StatelessWidget {
               '/login': (_) => const LoginScreen(),
               '/register': (_) => const RegisterScreen(),
               '/chat': (_) => const MessagesScreen(),
+              '/forgot-password': (_) => const ForgotPasswordScreen(),
             },
           ),
         );
