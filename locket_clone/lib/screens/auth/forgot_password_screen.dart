@@ -37,29 +37,23 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     }
   }
 
-  /// Xử lý khi nhấn nút "Tiếp tục"
   Future<void> _submit() async {
     if (!_isContinueEnabled) return;
 
     setState(() => _isLoading = true);
+    final email = _emailCtl.text.trim();
 
     // TODO: Triển khai gọi API gửi mã khôi phục đến email
 
     // Giả lập một cuộc gọi API
     await Future.delayed(const Duration(seconds: 1));
-
-    // In ra console để kiểm tra
-    print('Gửi yêu cầu khôi phục cho: ${_emailCtl.text.trim()}');
+    print('Gửi yêu cầu khôi phục cho: $email');
 
     if (!mounted) return;
     setState(() => _isLoading = false);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Đã gửi email khôi phục (nếu tài khoản tồn tại).'),
-        backgroundColor: AppColors.success.withOpacity(0.9),
-      ),
-    );
+    // Chuyển sang màn hình nhập OTP, truyền email qua arguments
+    Navigator.of(context).pushNamed('/otp-verify', arguments: email);
   }
 
   @override

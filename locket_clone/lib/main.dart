@@ -21,6 +21,8 @@ import 'screens/home/home_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/auth/forgot_password_screen.dart';
+import 'package:locket_clone/screens/auth/otp_verification_screen.dart';
+import 'package:locket_clone/screens/auth/reset_password_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,10 +46,7 @@ class LocketClone extends StatelessWidget {
 
     // Auth
     final authApi = AuthApi(dio);
-    final authRepo = AuthRepositoryImpl(
-      authApi,
-      storage,
-    );
+    final authRepo = AuthRepositoryImpl(authApi, storage);
     final authCtrl = AuthController(authRepo);
 
     // Post
@@ -105,6 +104,8 @@ class LocketClone extends StatelessWidget {
               '/register': (_) => const RegisterScreen(),
               '/chat': (_) => const MessagesScreen(),
               '/forgot-password': (_) => const ForgotPasswordScreen(),
+              '/otp-verify': (_) => const OtpVerificationScreen(),
+              '/reset-password': (_) => const ResetPasswordScreen(),
             },
           ),
         );
