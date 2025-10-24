@@ -61,26 +61,32 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
     // Giả lập một cuộc gọi API
     await Future.delayed(const Duration(seconds: 1));
-    final bool isOtpValid = true; // Giả sử OTP luôn đúng
+    // final bool isOtpValid;
 
     if (!mounted) return;
     setState(() => _isLoading = false);
 
-    if (isOtpValid) {
-      // Chuyển đến màn hình Đặt lại mật khẩu, mang theo email và OTP đã xác thực
-      Navigator.of(context).pushNamedAndRemoveUntil(
-        '/reset-password',
-        (route) => route.isFirst, // Giữ lại màn hình Welcome/Login
-        arguments: {'email': email, 'otp': otp},
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Mã OTP không hợp lệ. Vui lòng thử lại.'),
-          backgroundColor: AppColors.error.withOpacity(0.9),
-        ),
-      );
-    }
+    // if (isOtpValid) {
+    //   // Chuyển đến màn hình Đặt lại mật khẩu, mang theo email và OTP đã xác thực
+    //   Navigator.of(context).pushNamedAndRemoveUntil(
+    //     '/reset-password',
+    //     (route) => route.isFirst, // Giữ lại màn hình Welcome/Login
+    //     arguments: {'email': email, 'otp': otp},
+    //   );
+    // } else {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       content: const Text('Mã OTP không hợp lệ. Vui lòng thử lại.'),
+    //       backgroundColor: AppColors.error.withOpacity(0.9),
+    //     ),
+    //   );
+    // }
+
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      '/reset-password',
+      (route) => route.isFirst, // Giữ lại màn hình Welcome/Login
+      arguments: {'email': email, 'otp': otp},
+    );
   }
 
   /// Xử lý khi nhấn "Gửi lại mã"
