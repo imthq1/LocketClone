@@ -104,12 +104,15 @@ class _LoginScreenState extends State<LoginScreen> {
                             //   width: 64,
                             // ),
                             // const SizedBox(height: 16),
-                            const Text(
-                              'Chào mừng bạn trở lại',
-                              style: TextStyle(
-                                color: AppColors.textPrimary,
-                                fontSize: 28,
-                                fontWeight: FontWeight.w800,
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: const Text(
+                                'Chào mừng bạn trở lại!',
+                                style: TextStyle(
+                                  color: AppColors.textPrimary,
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w800,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 28),
@@ -160,27 +163,16 @@ class _LoginScreenState extends State<LoginScreen> {
                               isLoading: isLoading,
                               onPressed: _isLoginEnabled ? _signin : null,
                             ),
-                            const SizedBox(height: 12),
-                            TextButton(
-                              onPressed: isLoading ? null : _signup,
-                              child: const Text(
-                                'Chưa có tài khoản? Đăng ký ngay',
-                                style: TextStyle(
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ),
                           ],
                         ),
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 24.0, top: 16.0),
-                    child: Text(
-                      'Bằng việc tiếp tục, bạn đồng ý với Điều khoản và Chính sách của chúng tôi.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: AppColors.textHint, fontSize: 12),
+                  TextButton(
+                    onPressed: isLoading ? null : _signup,
+                    child: const Text(
+                      'Chưa có tài khoản? Đăng ký ngay',
+                      style: TextStyle(color: AppColors.textSecondary),
                     ),
                   ),
                 ],

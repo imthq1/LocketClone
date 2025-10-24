@@ -22,7 +22,7 @@ import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/auth/forgot_password_screen.dart';
 import 'package:locket_clone/screens/auth/otp_verification_screen.dart';
-import 'package:locket_clone/screens/auth/reset_password_screen.dart';
+import 'package:locket_clone/screens/auth/create_password_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -105,7 +105,8 @@ class LocketClone extends StatelessWidget {
               '/chat': (_) => const MessagesScreen(),
               '/forgot-password': (_) => const ForgotPasswordScreen(),
               '/otp-verify': (_) => const OtpVerificationScreen(),
-              '/reset-password': (_) => const ResetPasswordScreen(),
+              '/reset-password': (_) => const CreatePasswordScreen(),
+              '/register-step-2': (_) => const CreatePasswordScreen(),
             },
           ),
         );

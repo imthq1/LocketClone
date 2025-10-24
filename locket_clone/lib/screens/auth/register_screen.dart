@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:locket_clone/services/application/auth_controller.dart';
 import 'package:locket_clone/theme/app_colors.dart';
 import 'package:locket_clone/screens/auth/widgets/primary_auth_button.dart';
 import 'package:locket_clone/screens/auth/widgets/primary_auth_input.dart';
@@ -14,50 +12,33 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _emailCtl = TextEditingController();
-  final _passwordCtl = TextEditingController();
-  final _confirmPasswordCtl = TextEditingController();
   final _fullnameCtl = TextEditingController();
 
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
   bool _isRegisterEnabled = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     _fullnameCtl.addListener(_validateInput);
     _emailCtl.addListener(_validateInput);
-    _passwordCtl.addListener(_validateInput);
-    _confirmPasswordCtl.addListener(_validateInput);
   }
 
   @override
   void dispose() {
     _fullnameCtl.removeListener(_validateInput);
     _emailCtl.removeListener(_validateInput);
-    _passwordCtl.removeListener(_validateInput);
-    _confirmPasswordCtl.removeListener(_validateInput);
     _fullnameCtl.dispose();
     _emailCtl.dispose();
-    _passwordCtl.dispose();
-    _confirmPasswordCtl.dispose();
     super.dispose();
   }
 
   void _validateInput() {
     final fullname = _fullnameCtl.text.trim();
     final email = _emailCtl.text.trim();
-    final password = _passwordCtl.text;
-    final confirmPassword = _confirmPasswordCtl.text;
     final isEmailValid = RegExp(r"^[^@\s]+@[^@\s]+\.[^@\s]+$").hasMatch(email);
     final bool isEnabled =
-        fullname.isNotEmpty &&
-        email.isNotEmpty &&
-        password.isNotEmpty &&
-        confirmPassword.isNotEmpty &&
-        isEmailValid &&
-        password == confirmPassword &&
-        password.length >= 6;
+        fullname.isNotEmpty && email.isNotEmpty && isEmailValid;
 
     if (isEnabled != _isRegisterEnabled) {
       setState(() {
@@ -67,33 +48,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _submit() async {
-    final auth = context.read<AuthController>();
-    await auth.registerThenLogin(
-      email: _emailCtl.text.trim(),
-      password: _passwordCtl.text.trim(),
-      fullname: _fullnameCtl.text.trim(),
-    );
+    // TODO: Bạn có thể thêm bước gọi API "check email exists" ở đây nếu muốn
+
+    // Gói dữ liệu và chuyển sang màn hình tạo mật khẩu
+    final args = {
+      'fullname': _fullnameCtl.text.trim(),
+      'email': _emailCtl.text.trim(),
+    };
 
     if (!mounted) return;
-    if (auth.user != null) {
-      Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
-    } else if (auth.error != null) {
-      String errorMessage = auth.error!;
-      final apiErrorPrefix = RegExp(r'ApiException\(\d*\): ');
-      errorMessage = errorMessage.replaceFirst(apiErrorPrefix, '');
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(errorMessage),
-          backgroundColor: AppColors.error.withValues(alpha: 0.9),
-        ),
-      );
-    }
+    Navigator.of(context).pushNamed('/register-step-2', arguments: args);
   }
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = context.watch<AuthController>().isLoading;
+    final isLoading = _isLoading;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -146,42 +115,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               keyboardType: TextInputType.emailAddress,
                             ),
                             const SizedBox(height: 14),
-                            PrimaryAuthInput(
-                              controller: _passwordCtl,
-                              hintText: 'Mật khẩu (tối thiểu 6 ký tự)',
-                              obscureText: _obscurePassword,
-                              keyboardType: TextInputType.visiblePassword,
-                              suffixIcon: IconButton(
-                                onPressed: () => setState(
-                                  () => _obscurePassword = !_obscurePassword,
-                                ),
-                                icon: Icon(
-                                  _obscurePassword
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                  color: AppColors.secondaryText,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 14),
-                            PrimaryAuthInput(
-                              controller: _confirmPasswordCtl,
-                              hintText: 'Xác nhận mật khẩu',
-                              obscureText: _obscureConfirmPassword,
-                              keyboardType: TextInputType.visiblePassword,
-                              suffixIcon: IconButton(
-                                onPressed: () => setState(
-                                  () => _obscureConfirmPassword =
-                                      !_obscureConfirmPassword,
-                                ),
-                                icon: Icon(
-                                  _obscureConfirmPassword
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                  color: AppColors.secondaryText,
-                                ),
-                              ),
-                            ),
                           ],
                         ),
                       ),
@@ -218,6 +151,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
+                            TextSpan(text: ' của chúng tôi.'),
                           ],
                         ),
                       ),
