@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:locket_clone/screens/home/friend_screen.dart';
 import 'package:locket_clone/screens/home/messages_screen.dart';
 import 'package:locket_clone/services/auth/application/friends_controller.dart';
 import 'package:locket_clone/services/auth/data/datasources/friend_api.dart';
@@ -90,6 +91,7 @@ class LocketClone extends StatelessWidget {
               '/login': (_) => const LoginScreen(),
               '/register': (_) => const RegisterScreen(),
               '/chat': (_) => const MessagesScreen(),
+              '/friends': (_) => const FriendsScreen(),
             },
             onGenerateRoute: (settings) {
               if (settings.name == CreateUsernameScreen.route) {

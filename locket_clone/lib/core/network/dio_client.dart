@@ -42,18 +42,22 @@ class DioClient {
     // WEB: bật withCredentials để browser tự gửi cookie refresh_token (httpOnly).
     // (Chỉ hiệu lực trên web adapter của Dio.)
     if (kIsWeb) {
-      dio.options.extra = {
-        ...dio.options.extra,
-        'withCredentials': true,
-      };
+      dio.options.extra = {...dio.options.extra, 'withCredentials': true};
     }
 
     // MOBILE/DESKTOP: gắn CookieManager để lưu và gửi lại cookie (refresh_token).
     // Lưu ý: Cookie có flag Secure sẽ chỉ được gửi qua HTTPS theo chuẩn.
     // Nếu backend dùng HTTP dev + Secure cookie, refresh có thể không chạy được.
-    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS || Platform.isMacOS || Platform.isLinux || Platform.isWindows)) {
+    if (!kIsWeb &&
+        (Platform.isAndroid ||
+            Platform.isIOS ||
+            Platform.isMacOS ||
+            Platform.isLinux ||
+            Platform.isWindows)) {
       final supportDir = await getApplicationSupportDirectory();
-      final jar = PersistCookieJar(storage: FileStorage('${supportDir.path}/.auth_cookies'));
+      final jar = PersistCookieJar(
+        storage: FileStorage('${supportDir.path}/.auth_cookies'),
+      );
       dio.interceptors.add(CookieManager(jar));
     }
 

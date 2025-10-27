@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:locket_clone/screens/helpers/camera_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:locket_clone/services/auth/application/auth_controller.dart';
+import 'package:locket_clone/services/auth/application/friends_controller.dart';
 
 /// NOTE
 /// - Add `camera` to pubspec.yaml
@@ -149,6 +150,11 @@ class _CaptureBodyState extends State<HomeScreen> with WidgetsBindingObserver {
     final isReady = c?.value.isInitialized == true;
     final auth = context.watch<AuthController>();
     final user = auth.user;
+    Future.microtask(() => context.read<FriendsController>().loadOnce());
+
+    final friendsCount = context.select<FriendsController, int>(
+      (f) => f.friends.length,
+    );
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -169,8 +175,10 @@ class _CaptureBodyState extends State<HomeScreen> with WidgetsBindingObserver {
                       alignment: Alignment.centerLeft,
                       child: _PillButton(
                         icon: Icons.group,
-                        label: (user?.friend?.sumUser ?? 0).toString(),
-                        onTap: () {},
+                        label: friendsCount.toString(),
+                        onTap: () {
+                          Navigator.of(context).pushNamed('/friends');
+                        },
                       ),
                     ),
                   ),
