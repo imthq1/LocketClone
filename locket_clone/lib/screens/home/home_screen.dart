@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:locket_clone/screens/home/camera_view.dart';
-import 'package:locket_clone/screens/home/friend_feed_view.dart';
+import 'package:locket_clone/screens/feed/feed_screen.dart';
 import 'package:locket_clone/theme/app_colors.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -27,6 +27,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _scrollToCamera() {
+    _pageController.animateToPage(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
         scrollDirection: Axis.vertical,
         children: [
           CameraView(onHistoryPressed: _scrollToFeed),
-          const FriendFeedView(),
+          FeedScreen(onBackToCamera: _scrollToCamera),
         ],
       ),
     );
