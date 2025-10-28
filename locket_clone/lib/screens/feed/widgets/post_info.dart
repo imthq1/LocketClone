@@ -18,7 +18,6 @@ class PostInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final timeAgo = _formatTimestamp(post.createdAt);
-    // Dựa trên ảnh Loại 2 (image_fdefe8.jpg)
     final authorName = post.authorFullname ?? 'T';
 
     return Row(
@@ -26,14 +25,8 @@ class PostInfo extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 12,
-          // Yêu cầu 2: Cập nhật màu
-          backgroundColor: AppColors.fieldBackground, // Thay vì Colors.white24
-          child: Icon(
-            Icons.person,
-            size: 14,
-            // Yêu cầu 2: Cập nhật màu
-            color: AppColors.textSecondary,
-          ), // Thay vì Colors.white70
+          backgroundColor: AppColors.fieldBackground,
+          child: Icon(Icons.person, size: 14, color: AppColors.textSecondary),
         ),
         const SizedBox(width: 8),
         Text(

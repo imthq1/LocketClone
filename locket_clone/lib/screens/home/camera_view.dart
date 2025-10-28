@@ -226,7 +226,6 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
       body: SafeArea(
         child: Stack(
           children: [
-            const Align(alignment: Alignment.topCenter, child: HomeTopBar()),
             Column(
               children: [
                 const SizedBox(height: 80),

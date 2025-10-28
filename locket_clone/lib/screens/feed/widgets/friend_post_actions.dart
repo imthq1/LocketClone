@@ -7,11 +7,9 @@ class FriendPostActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      // Canh lề tương đối với khung ảnh
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Row(
         children: [
-          // 1. Nút "Gửi tin nhắn"
           Expanded(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -26,7 +24,6 @@ class FriendPostActions extends StatelessWidget {
             ),
           ),
 
-          // 2. Các nút Emoji (Tôi dùng IconButton cho dễ nhấn)
           _EmojiButton(emoji: '💛', onPressed: () {}),
           _EmojiButton(emoji: '🔥', onPressed: () {}),
           _EmojiButton(emoji: '😍', onPressed: () {}),
@@ -43,7 +40,6 @@ class FriendPostActions extends StatelessWidget {
   }
 }
 
-// Widget con cho các nút emoji
 class _EmojiButton extends StatelessWidget {
   final String emoji;
   final VoidCallback onPressed;

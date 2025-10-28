@@ -9,9 +9,8 @@ class ActivityInfo extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        // Yêu cầu 2: Cập nhật màu
         color:
-            AppColors.fieldBackground, // Thay vì Colors.white.withOpacity(0.1)
+            AppColors.fieldBackground,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
