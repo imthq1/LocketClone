@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:locket_clone/screens/home/widgets/camera_controls.dart';
 import 'package:locket_clone/screens/home/widgets/home_bottom_bar.dart';
-import 'package:locket_clone/screens/home/widgets/home_top_bar.dart';
 import 'package:locket_clone/screens/home/widgets/permission_denied_view.dart';
 import 'package:locket_clone/screens/send_to/send_to_screen.dart';
 import 'package:locket_clone/services/camera_service.dart';
