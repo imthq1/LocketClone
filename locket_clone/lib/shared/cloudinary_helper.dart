@@ -1,10 +1,6 @@
-const String kCloudBase =
-    'https://res.cloudinary.com/dw4yj3kvq/image/upload/v1760248720/';
+const String kCloudName = 'dzf7ojogs';
+const String kCloudBase = 'https://res.cloudinary.com/$kCloudName/image/upload/';
 
-/// image có thể là:
-/// - 'locket/abc123'  → thêm '.jpg'
-/// - 'locket/abc123.jpg' → giữ nguyên
-/// - '/locket/abc123.png' → remove slash đầu
 String buildCloudinaryUrl(String image) {
   if (image.isEmpty) return '';
   var id = image.trim();
