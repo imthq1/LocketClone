@@ -11,13 +11,12 @@ class FeedBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      // Đệm tương tự CameraControls
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Nút Grid (Loại 3)
+          // Nút Grid
           IconButton(
             onPressed: onGridPressed,
             icon: const Icon(
@@ -27,7 +26,7 @@ class FeedBottomBar extends StatelessWidget {
             iconSize: 32,
           ),
 
-          // Nút Chụp (Tái sử dụng)
+          // Nút Chụp
           ShutterButton(onPressed: onShutterPressed, size: 84),
 
           // Đối trọng để giữ nút Shutter ở giữa

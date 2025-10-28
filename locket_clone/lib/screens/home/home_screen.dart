@@ -1,10 +1,7 @@
-// lib/screens/home/home_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:locket_clone/screens/home/camera_view.dart';
-import 'package:locket_clone/screens/feed/feed_screen.dart'; // Import
-import 'package:locket_clone/screens/home/widgets/home_top_bar.dart'; // Top bar cố định
-// KHÔNG import FeedBottomBar ở đây nữa
+import 'package:locket_clone/screens/feed/feed_screen.dart';
+import 'package:locket_clone/screens/home/widgets/home_top_bar.dart';
 import 'package:locket_clone/services/application/post_controller.dart';
 import 'package:locket_clone/theme/app_colors.dart';
 import 'package:provider/provider.dart';

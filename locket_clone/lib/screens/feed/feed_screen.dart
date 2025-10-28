@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:locket_clone/screens/feed/widgets/feed_bottom_bar.dart'; // Import bottom bar
+import 'package:locket_clone/screens/feed/widgets/feed_bottom_bar.dart';
 import 'package:locket_clone/screens/feed/widgets/friend_feed_post_page.dart';
 import 'package:locket_clone/screens/feed/widgets/my_feed_post_page.dart';
 import 'package:locket_clone/services/application/auth_controller.dart';

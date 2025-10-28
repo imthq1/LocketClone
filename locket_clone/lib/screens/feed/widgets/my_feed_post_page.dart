@@ -11,18 +11,17 @@ class MyFeedPostPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // Container full-screen cho mỗi trang
       width: double.infinity,
       height: double.infinity,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Thẻ ảnh (1:1 + caption)
+          // Ảnh + caption
           PostCard(post: post),
 
           const SizedBox(height: 16),
 
-          // Thông tin ("Bạn | Vừa xong")
+          // Thông tin thời gian
           PostInfo(post: post),
 
           const SizedBox(height: 24),
@@ -30,8 +29,6 @@ class MyFeedPostPage extends StatelessWidget {
           // Thông tin ("Chưa có hoạt động nào")
           const ActivityInfo(),
 
-          // Đệm một khoảng trống ở dưới cùng để BottomBar
-          // không che mất nội dung quan trọng
           const SizedBox(height: 120),
         ],
       ),

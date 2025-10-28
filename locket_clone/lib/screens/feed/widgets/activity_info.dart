@@ -9,8 +9,7 @@ class ActivityInfo extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color:
-            AppColors.fieldBackground,
+        color: AppColors.fieldBackground,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(

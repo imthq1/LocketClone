@@ -9,7 +9,7 @@ class HomeTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Giả sử số lượng bạn bè, bạn có thể lấy từ FriendsController
+    // Giả sử số lượng bạn bè
     final friendCount = 0;
 
     return Padding(

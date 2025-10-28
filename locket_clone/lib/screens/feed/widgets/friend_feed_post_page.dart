@@ -16,19 +16,19 @@ class FriendFeedPostPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // 1. Thẻ ảnh
+          // Ảnh + caption
           PostCard(post: post),
 
           const SizedBox(height: 16),
 
-          // 2. Thông tin
+          // Thông tin thời gian
           PostInfo(post: post),
 
           const SizedBox(height: 24),
 
-          // 3. Thanh Actions
+          // Thanh Actions
           const FriendPostActions(),
-          
+
           const SizedBox(height: 120),
         ],
       ),
