@@ -8,16 +8,28 @@ class PostInfo extends StatelessWidget {
 
   String _formatTimestamp(DateTime? time) {
     if (time == null) return '';
-    // TODO: Triển khai logic "Vừa xong", "5d" v.v...
 
-    // Dựa trên ảnh Loại 2 (image_fdefe8.jpg)
-    if (post.authorFullname != 'Bạn') return '5d';
-    return 'Vừa xong';
+    final now = DateTime.now();
+    final difference = now.toUtc().difference(time.toUtc());
+
+    if (difference.inSeconds < 60) {
+      return 'Vừa xong';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}m';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays}d';
+    } else {
+      final weeks = (difference.inDays / 7).floor();
+      return '${weeks}w';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final timeAgo = _formatTimestamp(post.createdAt);
+
     final authorName = post.authorFullname ?? 'T';
 
     return Row(

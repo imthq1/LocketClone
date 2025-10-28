@@ -13,14 +13,17 @@ class AuthGate extends StatefulWidget {
 }
 
 class _AuthGateState extends State<AuthGate> {
-  bool _requested = false;
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_requested) {
-      _requested = true;
-      // Khi app start, thử loadCurrentUser
+
+    final auth = context.read<AuthController>();
+
+    final bool hasPartialUser = auth.user != null && auth.user!.friend == null;
+    final bool needsFullLoad =
+        (auth.user == null && !auth.isLoading) || hasPartialUser;
+
+    if (needsFullLoad && !auth.isLoading) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<AuthController>().loadCurrentUser();
       });
@@ -31,21 +34,22 @@ class _AuthGateState extends State<AuthGate> {
   Widget build(BuildContext context) {
     return Consumer<AuthController>(
       builder: (_, auth, __) {
-        if (auth.isLoading) {
+        final bool isEffectivelyLoading =
+            auth.isLoading || (auth.user != null && auth.user!.friend == null);
+
+        if (isEffectivelyLoading) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
         if (auth.user == null) {
-          // Chưa đăng nhập -> vào màn hình welcome
           return WelcomeScreen(
             onSignUp: () => Navigator.pushNamed(context, '/register'),
             onSignIn: () => Navigator.pushNamed(context, '/login'),
           );
         }
 
-        // Đã có user -> Home
         return const HomeScreen();
       },
     );
