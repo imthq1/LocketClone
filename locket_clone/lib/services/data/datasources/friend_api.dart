@@ -102,7 +102,7 @@ class FriendApi {
         queryParameters: {'email': email},
       );
       final data = _unwrap(res.data); // <-- giờ là Map của user
-      return UserDTO.fromJson(data as Map<String, dynamic>);
+      return UserDTO.fromJson(data);
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) return null;
       throw _asApiException(e);

@@ -451,7 +451,7 @@ class _Bubble extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: Image.network(
-                      imageUrl!,
+                      imageUrl,
                       width: 220,
                       height: 160,
                       fit: BoxFit.cover,

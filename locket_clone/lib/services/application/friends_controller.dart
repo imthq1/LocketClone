@@ -291,7 +291,6 @@ class FriendsController extends ChangeNotifier {
 
   Future<bool> unfriend(UserDTO other) async {
     final otherId = other.id;
-    if (otherId == null) return false;
     try {
       await _repo.deleteFriendShip(otherId);
       _friends.removeWhere((u) => u.id == otherId);

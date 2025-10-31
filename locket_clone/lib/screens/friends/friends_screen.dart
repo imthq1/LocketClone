@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:locket_clone/services/application/auth_controller.dart';
 import 'package:locket_clone/services/application/friends_controller.dart';
 import 'package:locket_clone/services/data/models/user_dto.dart';
 import 'package:locket_clone/services/data/models/friend_request_dto.dart';
@@ -36,7 +35,6 @@ class _FriendsScreenState extends State<FriendsScreen> {
   @override
   Widget build(BuildContext context) {
     final ctrl = context.watch<FriendsController>();
-    final auth = context.watch<AuthController>();
     final currentCount = ctrl.friends.length;
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -119,7 +117,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                         SnackBar(
                           content: Text(
                             ok
-                                ? 'Đã hủy kết bạn với ${user.fullname ?? user.email ?? 'người dùng'}'
+                                ? 'Đã hủy kết bạn với ${user.fullname}'
                                 : 'Không thể hủy kết bạn',
                           ),
                         ),
@@ -332,8 +330,8 @@ class _SearchResult extends StatelessWidget {
           backgroundImage: hasImg ? NetworkImage(user.image!) : null,
           child: !hasImg ? const Icon(Icons.person) : null,
         ),
-        title: Text(user.fullname ?? user.email ?? 'Người dùng'),
-        subtitle: Text(user.email ?? ''),
+        title: Text(user.fullname),
+        subtitle: Text(user.email),
         trailing: FilledButton(
           onPressed: ctrl.isSendingRequest || ctrl.searchResult == null
               ? null
@@ -367,7 +365,7 @@ class _SearchResult extends StatelessWidget {
 
 class _SectionTitle extends StatelessWidget {
   final String text;
-  const _SectionTitle(this.text, {super.key});
+  const _SectionTitle(this.text);
   @override
   Widget build(BuildContext context) {
     return Text(
@@ -384,14 +382,14 @@ class _SectionTitle extends StatelessWidget {
 class _FriendTile extends StatelessWidget {
   final UserDTO user;
   final VoidCallback? onUnfriend;
-  const _FriendTile({required this.user, this.onUnfriend, super.key});
+  const _FriendTile({required this.user, this.onUnfriend});
 
   @override
   Widget build(BuildContext context) {
     final url = user.image;
-    final displayName = (user.fullname?.isNotEmpty ?? false)
-        ? user.fullname!
-        : (user.email ?? 'Người dùng');
+    final displayName = (user.fullname.isNotEmpty)
+        ? user.fullname
+        : (user.email);
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -460,7 +458,6 @@ class _IncomingRequestTile extends StatelessWidget {
   final VoidCallback onReject;
 
   const _IncomingRequestTile({
-    super.key,
     required this.item,
     required this.onAccept,
     required this.onReject,
@@ -551,7 +548,7 @@ class _IncomingRequestTile extends StatelessWidget {
 }
 
 class _LoadingList extends StatelessWidget {
-  const _LoadingList({super.key});
+  const _LoadingList();
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -584,11 +581,7 @@ class _SentRequestTile extends StatelessWidget {
   final FriendRqSentItemDTO item;
   final VoidCallback onCancel;
 
-  const _SentRequestTile({
-    super.key,
-    required this.item,
-    required this.onCancel,
-  });
+  const _SentRequestTile({required this.item, required this.onCancel});
 
   @override
   Widget build(BuildContext context) {
