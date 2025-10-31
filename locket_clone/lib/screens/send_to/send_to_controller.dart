@@ -49,6 +49,9 @@ class SendToController extends ChangeNotifier {
 
   void _loadRecipients() {
     final listFriend = _auth.user?.friend;
+    if (kDebugMode) {
+      print('Danh sách bạn bè: ${listFriend?.sumUser} người');
+    }
     final items = <Recipient>[
       Recipient(id: 'all', name: 'Tất cả', avatarUrl: null, isAll: true),
     ];
@@ -56,8 +59,11 @@ class SendToController extends ChangeNotifier {
     if (listFriend != null && listFriend.friends.isNotEmpty) {
       items.addAll(
         listFriend.friends.map((u) {
-          final name = (u.fullname.isNotEmpty) ? u.fullname : u.email;
-          return Recipient(id: u.id.toString(), name: name, avatarUrl: u.image);
+          return Recipient(
+            id: u.id.toString(),
+            name: u.fullname,
+            avatarUrl: u.image,
+          );
         }),
       );
     }
