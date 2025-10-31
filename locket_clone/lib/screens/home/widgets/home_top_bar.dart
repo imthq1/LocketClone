@@ -4,7 +4,6 @@ import 'package:locket_clone/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 
 class HomeTopBar extends StatelessWidget {
-  // TODO: Thêm các callbacks (onProfilePressed, onFriendsPressed)
   const HomeTopBar({super.key});
 
   @override
@@ -31,7 +30,8 @@ class HomeTopBar extends StatelessWidget {
           // Nút Bạn bè
           TextButton.icon(
             onPressed: () {
-              /* TODO: Mở màn hình bạn bè */
+              context.read<FriendsController>().load();
+              Navigator.pushReplacementNamed(context, '/friends');
             },
             style: TextButton.styleFrom(
               backgroundColor: Colors.white10,
@@ -48,9 +48,8 @@ class HomeTopBar extends StatelessWidget {
           // Nút Chat
           IconButton(
             onPressed: () {
-              // Load danh sách bạn bè trước khi mở màn hình chat
               context.read<FriendsController>().load();
-              Navigator.pushNamed(context, '/chat');
+              Navigator.pushReplacementNamed(context, '/chat');
             },
             icon: const Icon(
               Icons.chat_bubble_outline,

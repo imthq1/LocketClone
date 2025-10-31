@@ -19,7 +19,7 @@ class MessagesScreen extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white70),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
         ),
         centerTitle: true,
         title: const Text(
