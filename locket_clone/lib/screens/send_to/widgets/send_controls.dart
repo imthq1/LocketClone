@@ -5,7 +5,6 @@ class SendControls extends StatelessWidget {
   final VoidCallback? onCancelPressed;
   final VoidCallback? onSendPressed;
 
-  // Thêm các tham số size
   final double cancelIconSize;
   final double sendButtonSize;
   final double sendIconSize;

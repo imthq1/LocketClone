@@ -8,6 +8,8 @@ import 'package:locket_clone/services/application/auth_controller.dart';
 import 'package:locket_clone/services/application/post_controller.dart';
 import 'package:locket_clone/theme/app_colors.dart';
 import 'package:provider/provider.dart';
+import 'package:gal/gal.dart';
+import 'package:flutter/foundation.dart';
 
 class SendToScreen extends StatelessWidget {
   final String imagePath;
@@ -25,9 +27,17 @@ class SendToScreen extends StatelessWidget {
   }
 }
 
-class _SendToScreenView extends StatelessWidget {
+class _SendToScreenView extends StatefulWidget {
   final String imagePath;
   const _SendToScreenView({required this.imagePath});
+
+  @override
+  State<_SendToScreenView> createState() => _SendToScreenViewState();
+}
+
+class _SendToScreenViewState extends State<_SendToScreenView> {
+  bool _isDownloading = false;
+  bool _isDownloadSuccess = false;
 
   void _onCancel(BuildContext context) {
     Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
@@ -35,7 +45,7 @@ class _SendToScreenView extends StatelessWidget {
 
   Future<void> _onSend(BuildContext context) async {
     final controller = context.read<SendToController>();
-    final bool success = await controller.sendPost(imagePath);
+    final bool success = await controller.sendPost(widget.imagePath);
 
     if (!context.mounted) return;
     if (success) {
@@ -115,18 +125,57 @@ class _SendToScreenView extends StatelessWidget {
     controller.setCaption(result);
   }
 
-  void _onDownload() {
-    // TODO: Triển khai logic lưu ảnh
-    print('Lưu ảnh...');
+  Future<void> _onDownload() async {
+    if (_isDownloading || _isDownloadSuccess) return;
+
+    setState(() => _isDownloading = true);
+
+    try {
+      // 1. Tạo một Future cho việc lưu ảnh
+      final saveOperation = Gal.putImage(widget.imagePath, album: 'Locket');
+
+      // 2. Tạo một Future cho khoảng trễ tối thiểu
+      final minDelay = Future.delayed(
+        const Duration(seconds: 0, milliseconds: 600),
+      );
+
+      // 3. Chờ cả hai hoàn thành
+      await Future.wait([saveOperation, minDelay]);
+
+      // 4. Đặt cờ thành công
+      if (!mounted) return;
+      setState(() {
+        _isDownloadSuccess = true;
+      });
+    } catch (e) {
+      // 5. Xử lý lỗi
+      if (kDebugMode) {
+        print('Lỗi khi lưu ảnh: $e');
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lưu ảnh thất bại. Vui lòng thử lại. $e'),
+          backgroundColor: AppColors.error.withValues(alpha: 0.9),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isDownloading = false;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final caption = context.watch<SendToController>().caption;
     final isSending = context.watch<SendToController>().isSending;
+    final isLoadingOverlay = isSending || _isDownloading;
 
     return AbsorbPointer(
-      absorbing: isSending,
+      absorbing: isLoadingOverlay,
       child: Scaffold(
         backgroundColor: AppColors.background,
         body: SafeArea(
@@ -135,14 +184,18 @@ class _SendToScreenView extends StatelessWidget {
               // 1. Top Bar
               Align(
                 alignment: Alignment.topCenter,
-                child: SendToTopBar(onDownloadPressed: _onDownload),
+                child: SendToTopBar(
+                  onDownloadPressed: _onDownload,
+                  isDownloading: _isDownloading,
+                  isDownloadSuccess: _isDownloadSuccess,
+                ),
               ),
               Column(
                 children: [
                   const SizedBox(height: 80),
                   // 2. Khung ảnh
                   PicturePreview(
-                    imagePath: imagePath,
+                    imagePath: widget.imagePath,
                     caption: caption,
                     onAddMessagePressed: () => _showEditMessageSheet(context),
                   ),
@@ -154,7 +207,7 @@ class _SendToScreenView extends StatelessWidget {
                       onSendPressed: () => _onSend(context),
                       cancelIconSize: 35,
                       sendButtonSize: 90,
-                      sendIconSize: 40,
+                      sendIconSize: 60,
                     ),
                   ),
                   const Spacer(),
@@ -163,8 +216,7 @@ class _SendToScreenView extends StatelessWidget {
                 ],
               ),
 
-              // Lớp phủ
-              if (isSending)
+              if (isLoadingOverlay)
                 Container(
                   color: Colors.black54,
                   alignment: Alignment.center,
