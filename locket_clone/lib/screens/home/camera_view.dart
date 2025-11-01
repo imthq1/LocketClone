@@ -175,47 +175,59 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   }
 
   Widget _buildCameraView() {
-    if (_permissionState == CameraPermissionState.initializing ||
-        _isInitializing) {
-      return const Center(
+    final bool isLoading =
+        _permissionState == CameraPermissionState.initializing ||
+        _isInitializing;
+    final bool isDenied = _permissionState == CameraPermissionState.denied;
+    final bool isGranted = _permissionState == CameraPermissionState.granted;
+    final ctrl = _controller;
+
+    Widget cameraPreviewWidget = Container();
+    if (isGranted && ctrl != null && ctrl.value.isInitialized) {
+      final previewSize = ctrl.value.previewSize;
+      if (previewSize != null) {
+        cameraPreviewWidget = FittedBox(
+          fit: BoxFit.cover,
+          child: SizedBox(
+            width: previewSize.height,
+            height: previewSize.width,
+            child: CameraPreview(ctrl),
+          ),
+        );
+      }
+    }
+
+    Widget? overlayWidget;
+    if (isLoading) {
+      overlayWidget = const Center(
         child: CircularProgressIndicator(color: AppColors.brandYellow),
+      );
+    } else if (isDenied) {
+      overlayWidget = PermissionDeniedView(onPressed: _onGrantPermission);
+    } else if (isGranted && (ctrl == null || !ctrl.value.isInitialized)) {
+      overlayWidget = PermissionDeniedView(onPressed: _initializeCamera);
+    } else if (isGranted && ctrl != null && ctrl.value.previewSize == null) {
+      overlayWidget = const Center(
+        child: Text("Không thể lấy kích thước camera"),
       );
     }
 
-    switch (_permissionState) {
-      case CameraPermissionState.denied:
-        return PermissionDeniedView(onPressed: _onGrantPermission);
-
-      case CameraPermissionState.granted:
-        final ctrl = _controller;
-        if (ctrl == null || !ctrl.value.isInitialized) {
-          return PermissionDeniedView(onPressed: _initializeCamera);
-        }
-
-        final previewSize = ctrl.value.previewSize;
-        if (previewSize == null) {
-          return const Center(child: Text("Không thể lấy kích thước camera"));
-        }
-
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(32.0),
-          child: AspectRatio(
-            aspectRatio: 1.0,
-            child: FittedBox(
-              fit: BoxFit.cover,
-              child: SizedBox(
-                width: previewSize.height,
-                height: previewSize.width,
-                child: CameraPreview(ctrl),
-              ),
-            ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(32.0),
+      child: AspectRatio(
+        aspectRatio: 1.0,
+        child: Container(
+          color: AppColors.fieldBackground,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              cameraPreviewWidget,
+              if (overlayWidget != null) overlayWidget,
+            ],
           ),
-        );
-      default:
-        return const Center(
-          child: CircularProgressIndicator(color: AppColors.brandYellow),
-        );
-    }
+        ),
+      ),
+    );
   }
 
   @override
@@ -227,10 +239,10 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
           children: [
             Column(
               children: [
-                const SizedBox(height: 80),
+                const SizedBox(height: 70),
                 _buildCameraView(),
                 Padding(
-                  padding: const EdgeInsets.only(top: 54.0),
+                  padding: const EdgeInsets.only(top: 70),
                   child: CameraControls(
                     onFlashPressed: _toggleFlash,
                     onShutterPressed: _takePicture,
