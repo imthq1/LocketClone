@@ -5,12 +5,11 @@ import 'package:locket_clone/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 
 class HomeTopBar extends StatelessWidget {
-  final sumUser;
-  const HomeTopBar({super.key, this.sumUser});
+  final int sumUser;
+  const HomeTopBar({super.key, this.sumUser = 0});
 
   @override
   Widget build(BuildContext context) {
-    // Giả sử số lượng bạn bè
     final friendCount = sumUser;
 
     return Padding(
@@ -23,10 +22,7 @@ class HomeTopBar extends StatelessWidget {
             onPressed: () {
               /* TODO: Mở màn hình profile */
             },
-            icon: const Icon(
-              Icons.person_outline,
-              color: AppColors.textPrimary,
-            ),
+            icon: const Icon(Icons.person, color: AppColors.textPrimary),
           ),
           const SizedBox(width: 1),
           IconButton(
