@@ -27,4 +27,5 @@ public class UserDTO {
         private long sumUser;
         private List<UserDTO> friends;
     }
+
 }

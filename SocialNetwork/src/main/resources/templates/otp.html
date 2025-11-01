@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Mã xác thực</title>
+    <style>
+        body { font-family: Arial, sans-serif; color:#222; }
+        .box { max-width:520px; margin:20px auto; padding:24px; border:1px solid #eee; border-radius:10px; }
+        .otp { font-size:28px; letter-spacing:4px; font-weight:bold; background:#f5f7ff; padding:12px 16px; display:inline-block; border-radius:8px;}
+        .muted { color:#666; font-size:13px; }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h2>Xin chào <span th:text="${name}">bạn</span>,</h2>
+    <p>Mã xác thực của bạn là:</p>
+    <p><span class="otp" th:text="${value}">123456</span></p>
+    <p class="muted">Mã sẽ hết hạn sau 5 phút.</p>
+    <p>Nếu bạn không yêu cầu, hãy bỏ qua email này.</p>
+</div>
+</body>
+</html>

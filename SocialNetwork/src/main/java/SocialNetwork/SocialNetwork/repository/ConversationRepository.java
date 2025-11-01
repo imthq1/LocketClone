@@ -25,5 +25,16 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
       ORDER BY c.updatedAt DESC
     """)
     List<Conversation> findAllForUser(@Param("me") Long me);
+    @Query("""
+        select case
+            when c.user1.id = :currentUserId then c.user2.id
+            else c.user1.id
+        end
+        from Conversation c
+        where c.id = :conversationId
+          and (:currentUserId = c.user1.id or :currentUserId = c.user2.id)
+        """)
+    Long findPeerId(@Param("conversationId") Long conversationId,
+                    @Param("currentUserId") Long currentUserId);
 
 }

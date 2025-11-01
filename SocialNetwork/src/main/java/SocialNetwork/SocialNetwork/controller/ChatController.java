@@ -3,11 +3,13 @@ package SocialNetwork.SocialNetwork.controller;
 import SocialNetwork.SocialNetwork.domain.Conversation;
 import SocialNetwork.SocialNetwork.domain.Message;
 import SocialNetwork.SocialNetwork.domain.Request.CreateMessageRequest;
+import SocialNetwork.SocialNetwork.domain.Request.TypingReq;
 import SocialNetwork.SocialNetwork.domain.Response.ConversationDTO;
 import SocialNetwork.SocialNetwork.domain.Response.MessageResponseDTO;
 import SocialNetwork.SocialNetwork.domain.User;
 import SocialNetwork.SocialNetwork.repository.UserRepository;
 import SocialNetwork.SocialNetwork.service.ChatService;
+import SocialNetwork.SocialNetwork.service.UserService;
 import SocialNetwork.SocialNetwork.util.ApiMessage;
 import SocialNetwork.SocialNetwork.util.SecurityUtil;
 import SocialNetwork.SocialNetwork.util.mapper.ConversationMapper;
@@ -15,6 +17,7 @@ import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,10 +30,15 @@ public class ChatController {
     private final ChatService chatService;
     private final UserRepository UserRepository;
     private final SimpMessagingTemplate messagingTemplate;
-    public ChatController(ChatService chatService, UserRepository UserRepository, SimpMessagingTemplate messagingTemplate) {
+    private final UserService userService;
+    private final UserRepository userRepository;
+
+    public ChatController(ChatService chatService, UserRepository UserRepository, SimpMessagingTemplate messagingTemplate, UserService userService, UserRepository userRepository) {
         this.chatService = chatService;
         this.UserRepository = UserRepository;
         this.messagingTemplate = messagingTemplate;
+        this.userService = userService;
+        this.userRepository = userRepository;
     }
     @GetMapping("/messageConversation")
     @ApiMessage("Get History Chat")
@@ -74,21 +82,27 @@ public class ChatController {
 //    /**
 //     * Client SEND tới: /app/conversations/{conversationId}/typing
 //     * Server BROADCAST tới: /user/{peerId}/queue/typing
-//     */
-//    @MessageMapping("/conversations/{conversationId}/typing")
-//    public void typing(@DestinationVariable Long conversationId,
-//                       TypingReq req,
-//                       Principal principal) {
-//        Long currentUserId = Long.valueOf(principal.getName());
-//        // Validate membership
-//        chatService.ensureParticipant(conversationId, currentUserId);
-//
-//        Long peerId = chatService.findPeerId(conversationId, currentUserId);
-//        messagingTemplate.convertAndSendToUser(String.valueOf(peerId),
-//                "/queue/typing",
-//                new TypingEvent(conversationId, currentUserId, req.isTyping()));
-//    }
-//
+
+    @MessageMapping("/conversations/{conversationId}/typing")
+    public void typing(@DestinationVariable Long conversationId,
+                       @Payload TypingReq req,
+                       Principal principal) {
+
+        String currentUserEmail = principal.getName(); // email từ JWT trên WS
+        User currentUser = userRepository.findByEmail(currentUserEmail);
+
+
+        Long peerId = chatService.findPeerId(conversationId, currentUser.getId());
+        String peerEmail = userRepository.findEmailById(peerId)
+                .orElseThrow(() -> new RuntimeException("Peer not found"));
+
+        var event = new TypingReq.TypingEvent(conversationId, currentUser.getId(), req.isTyping());
+
+        // IMPORTANT: dùng peerEmail vì Principal.getName() của peer là email
+        messagingTemplate.convertAndSendToUser(peerEmail, "/queue/typing", event);
+    }
+
+
 //    /**
 //     * Client SEND tới: /app/conversations/{conversationId}/read
 //     * Server BROADCAST tới: /topic/conversations.{conversationId}

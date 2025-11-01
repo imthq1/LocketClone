@@ -51,7 +51,13 @@ public class ChatService {
 
         return mapToDTO(saved);
     }
-
+    public Long findPeerId(Long conversationId, Long currentUserId) {
+        Long peerId = conversationRepo.findPeerId(conversationId, currentUserId);
+        if (peerId == null) {
+            throw new RuntimeException("User is not part of this conversation or conversation not found");
+        }
+        return peerId;
+    }
     private MessageResponseDTO mapToDTO(Message msg) {
         return MessageResponseDTO.builder()
                 .id(msg.getId())

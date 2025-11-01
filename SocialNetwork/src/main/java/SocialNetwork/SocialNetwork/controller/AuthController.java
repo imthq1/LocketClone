@@ -3,6 +3,7 @@ package SocialNetwork.SocialNetwork.controller;
 import SocialNetwork.SocialNetwork.domain.FriendRequest;
 import SocialNetwork.SocialNetwork.domain.Request.ReqDTO;
 import SocialNetwork.SocialNetwork.domain.Request.ResLoginDTO;
+import SocialNetwork.SocialNetwork.domain.Request.UserResetPass;
 import SocialNetwork.SocialNetwork.domain.Response.UserDTO;
 import SocialNetwork.SocialNetwork.domain.User;
 import SocialNetwork.SocialNetwork.service.FriendService;
@@ -21,6 +22,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
@@ -37,16 +39,18 @@ public class AuthController {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private static final String RT_COOKIE = "refresh_token";
     private static final String RT_PATH   = "/api/auth";
-
+    private final PasswordEncoder passwordEncoder;
     @Value("${imthang.jwt.refresh-token-validity-in-seconds:90000}")
     private long refreshTokenExpiration;
     public AuthController(UserService userService, AuthenticationManagerBuilder authenticationManagerBuilder,
-                          SecurityUtil securityUtil, SessionService sessionService, FriendService friendService) {
+                          SecurityUtil securityUtil, SessionService sessionService, FriendService friendService,
+                          PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.securityUtil = securityUtil;
         this.sessionService = sessionService;
         this.friendService = friendService;
+        this.passwordEncoder = passwordEncoder;
     }
     @PostMapping("/auth/register")
     @ApiMessage("Register Account")
@@ -96,6 +100,15 @@ public class AuthController {
         userDTO.setFriend(friendDTO);
 
         return ResponseEntity.ok(userDTO);
+    }
+    @PutMapping("/auth/resetPw")
+    public ResponseEntity<?> resetPass(@RequestBody UserResetPass userDTO)
+        throws IdInValidException {
+        User user=this.userService.getUserByEmail(userDTO.getEmail());
+        String hashPass=passwordEncoder.encode(userDTO.getPassword());
+        user.setPassword(hashPass);
+        this.userService.save(user);
+        return ResponseEntity.ok("Password reset successful");
     }
     @PostMapping("/auth/login")
     @ApiMessage("Login Account")

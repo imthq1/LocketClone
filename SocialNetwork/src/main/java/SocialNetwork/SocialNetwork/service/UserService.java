@@ -22,6 +22,12 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
         this.FriendRequestRepository = friendRequestRepository;
     }
+    public User save(User user) {
+       return userRepository.save(user);
+    }
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
@@ -32,13 +38,12 @@ public class UserService {
     @Transactional
     public UserDTO CreateUser(User user) {
         user.setPassword(this.passwordEncoder.encode(user.getPassword()));
+        User UserDTO= this.userRepository.save(user);
         UserDTO userDTO = new UserDTO();
-        userDTO.setId(user.getId());
-        userDTO.setEmail(user.getEmail());
-        userDTO.setAddress(user.getAddress());
-        userDTO.setFullname(user.getFullname());
-
-        this.userRepository.save(user);
+        userDTO.setId(UserDTO.getId());
+        userDTO.setEmail(UserDTO.getEmail());
+        userDTO.setAddress(UserDTO.getAddress());
+        userDTO.setFullname(UserDTO.getFullname());
 
         return userDTO;
     }
