@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:locket_clone/screens/welcome/widgets/primary_btn.dart';
 import 'package:locket_clone/theme/app_colors.dart';
-import './widgets/ggSignIn_btn.dart';
+// import './widgets/ggSignIn_btn.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({
@@ -77,12 +77,12 @@ class WelcomeScreen extends StatelessWidget {
             PrimaryBtn(label: 'Tạo một tài khoản', onPressed: onSignUp),
             const SizedBox(height: 16),
 
-            GoogleSignInButton(
-              onPressed: () {
-                print('Google Sign-In pressed');
-              },
-            ),
-            const SizedBox(height: 8),
+            // GoogleSignInButton(
+            //   onPressed: () {
+            //     print('Google Sign-In pressed');
+            //   },
+            // ),
+            // const SizedBox(height: 8),
 
             TextButton(
               onPressed: onSignIn,

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:convert';
 import '../models/user_dto.dart';
 import '../models/res_login_dto.dart';
@@ -123,6 +124,51 @@ class AuthApi {
   Future<void> logout() async {
     try {
       await _dio.post('/auth/logout');
+    } on DioException catch (e) {
+      throw _asApiException(e);
+    }
+  }
+
+  Future<void> sendResetOtp(String email) async {
+    try {
+      String url;
+      if (kIsWeb) {
+        url = 'http://localhost:8080/auth/otp/send';
+      } else {
+        url = 'http://10.0.2.2:8080/auth/otp/send';
+      }
+
+      await _dio.post(url, data: {'email': email, 'purpose': 'RESET_PASSWORD'});
+    } on DioException catch (e) {
+      throw _asApiException(e);
+    }
+  }
+
+  Future<void> verifyResetOtp(String email, String otp) async {
+    try {
+      String url;
+      if (kIsWeb) {
+        url = 'http://localhost:8080/auth/otp/verify';
+      } else {
+        url = 'http://10.0.2.2:8080/auth/otp/verify';
+      }
+
+      await _dio.post(
+        url,
+        data: {'email': email, 'purpose': 'RESET_PASSWORD', 'otp': otp},
+      );
+    } on DioException catch (e) {
+      throw _asApiException(e);
+    }
+  }
+
+  Future<void> resetPassword(String email, String newPassword) async {
+    try {
+      await _dio.put(
+        '/auth/resetPw',
+        data: {'email': email, 'password': newPassword},
+        options: Options(responseType: ResponseType.plain),
+      );
     } on DioException catch (e) {
       throw _asApiException(e);
     }

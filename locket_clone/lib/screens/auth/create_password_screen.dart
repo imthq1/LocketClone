@@ -19,10 +19,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _isButtonEnabled = false;
-
-  // Dùng để xác định đây là luồng Đăng ký hay Đặt lại mật khẩu
   bool _isResetFlow = false;
-  // Dùng để lưu trữ arguments
   Map<String, dynamic>? _args;
 
   @override
@@ -35,7 +32,6 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Đọc arguments và xác định luồng
     final routeName = ModalRoute.of(context)?.settings.name;
     _isResetFlow = routeName == '/reset-password';
     _args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
@@ -88,43 +84,32 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
     if (_isResetFlow) {
       // --- LUỒNG ĐẶT LẠI MẬT KHẨU ---
       final email = _args?['email'] as String?;
-      final otp = _args?['otp'] as String?;
 
-      if (email == null || otp == null) {
-        _showErrorSnackBar('Thiếu thông tin email hoặc OTP. Vui lòng thử lại.');
+      if (email == null) {
+        _showErrorSnackBar('Thiếu thông tin email. Vui lòng thử lại.');
         return;
       }
 
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text(
-            'Đã đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.',
-          ),
-          backgroundColor: AppColors.success.withValues(alpha: 0.9),
-        ),
+      final bool success = await auth.resetPassword(
+        email: email,
+        newPassword: password,
       );
-      // Quay về màn hình đầu tiên (AuthGate/Welcome)
-      Navigator.of(context).popUntil((route) => route.isFirst);
-
-      // await auth.resetPassword(email: email, otp: otp, newPassword: password);
-
-      // if (!mounted) return;
-      // if (auth.error == null) {
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     SnackBar(
-      //       content: const Text(
-      //         'Đã đặt lại mật khẩu thành công. Vui lòng đăng nhập.',
-      //       ),
-      //       backgroundColor: AppColors.success.withValues(alpha: 0.9),
-      //     ),
-      //   );
-      //   // Quay về màn hình đầu tiên (AuthGate/Welcome)
-      //   Navigator.of(context).popUntil((route) => route.isFirst);
-      // } else {
-      //   _showErrorSnackBar(auth.error!);
-      // }
+      
+      if (!mounted) return;
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Đã đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.',
+              style: TextStyle(color: AppColors.textPrimary),
+            ),
+            backgroundColor: AppColors.success.withValues(alpha: 0.9),
+          ),
+        );
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      } else {
+        _showErrorSnackBar(auth.error ?? 'Đặt lại mật khẩu thất bại.');
+      }
     } else {
       // --- LUỒNG ĐĂNG KÝ ---
       final email = _args?['email'] as String?;
