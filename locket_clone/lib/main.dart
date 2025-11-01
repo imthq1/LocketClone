@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:locket_clone/screens/friends/friends_screen.dart';
 import 'package:locket_clone/screens/home/messages_screen.dart';
+import 'package:locket_clone/screens/profile/profile_screen.dart';
 import 'package:locket_clone/services/application/chat_controller.dart';
 import 'package:locket_clone/services/application/friends_controller.dart';
 import 'package:locket_clone/services/data/datasources/chat_api.dart';
@@ -109,6 +110,7 @@ class LocketClone extends StatelessWidget {
               '/reset-password': (_) => const CreatePasswordScreen(),
               '/register-step-2': (_) => const CreatePasswordScreen(),
               '/friends': (_) => const FriendsScreen(),
+              '/profile': (_) => const ProfileScreen(),
             },
           ),
         );

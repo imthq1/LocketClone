@@ -20,7 +20,7 @@ class HomeTopBar extends StatelessWidget {
           // Nút Profile
           IconButton(
             onPressed: () {
-              /* TODO: Mở màn hình profile */
+              Navigator.pushReplacementNamed(context, '/profile');
             },
             icon: const Icon(Icons.person, color: AppColors.textPrimary),
           ),
