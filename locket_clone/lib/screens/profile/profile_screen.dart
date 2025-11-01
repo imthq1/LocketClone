@@ -1,16 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:locket_clone/services/application/auth_controller.dart';
 import 'package:locket_clone/theme/app_colors.dart';
-import 'widgets/profile_avatar.dart';
+import 'package:locket_clone/screens/friends/utils/initials.dart';
+import 'package:locket_clone/shared/cloudinary_helper.dart';
+import 'package:provider/provider.dart';
 import 'widgets/profile_option_tile.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
+  Future<void> _logout(BuildContext context) async {
+    final auth = context.read<AuthController>();
+    await auth.logout();
+
+    if (context.mounted) {
+      Navigator.of(
+        context,
+      ).pushNamedAndRemoveUntil('/welcome', (route) => false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    const String fullName = 'Anh Hoàng';
-    const String email = '288hoanganh@gmail.com';
-    const String initials = 'AH';
+    final auth = context.watch<AuthController>();
+    final user = auth.user;
+
+    if (user == null) {
+      return const Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.brandYellow),
+        ),
+      );
+    }
+
+    final String fullName = user.fullname;
+    final String email = user.email;
+    final String? imageUrl = user.image;
+    final String initials = initialsFrom(fullName);
+    final bool hasImage = imageUrl != null && imageUrl.isNotEmpty;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -39,10 +67,36 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 // 1. Avatar
-                const ProfileAvatar(initials: initials),
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0x33FFFFFF),
+                      width: 8.0,
+                    ),
+                  ),
+                  child: CircleAvatar(
+                    radius: 82,
+                    backgroundColor: AppColors.fieldBackground,
+                    backgroundImage: hasImage
+                        ? NetworkImage(buildCloudinaryUrl(imageUrl))
+                        : null,
+                    child: hasImage
+                        ? null
+                        : Text(
+                            initials,
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 40,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  ),
+                ),
                 const SizedBox(height: 12),
 
-                // 2. Tên
+                // 2. Tên đầy đủ
                 Text(
                   fullName,
                   style: const TextStyle(
@@ -54,7 +108,9 @@ class ProfileScreen extends StatelessWidget {
 
                 // 3. Chỉnh ảnh
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    // TODO: Logic chỉnh sửa ảnh đại diện
+                  },
                   child: const Text(
                     'Chỉnh ảnh',
                     style: TextStyle(
@@ -73,13 +129,15 @@ class ProfileScreen extends StatelessWidget {
                   icon: Icons.person,
                   title: 'Sửa tên',
                   subtitle: fullName,
-                  onTap: () {},
+                  onTap: () {
+                    // TODO: Logic sửa tên
+                  },
                 ),
 
-                // 5. Thay đổi email
+                // 5. Thông tin email
                 ProfileOptionTile(
                   icon: Icons.mail,
-                  title: 'Thay đổi địa chỉ email',
+                  title: 'Địa chỉ email',
                   subtitle: email,
                   onTap: () {},
                 ),
@@ -89,7 +147,7 @@ class ProfileScreen extends StatelessWidget {
                 ProfileOptionTile(
                   icon: Icons.logout,
                   title: 'Đăng xuất',
-                  onTap: () {},
+                  onTap: () => _logout(context),
                   color: AppColors.error,
                 ),
                 const SizedBox(height: 40),

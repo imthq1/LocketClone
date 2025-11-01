@@ -101,6 +101,7 @@ class LocketClone extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             home: const AuthGate(),
             routes: {
+              '/welcome': (_) => const AuthGate(),
               '/home': (_) => const HomeScreen(),
               '/login': (_) => const LoginScreen(),
               '/register': (_) => const RegisterScreen(),

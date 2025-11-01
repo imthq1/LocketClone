@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:locket_clone/services/application/auth_controller.dart';
 import 'package:locket_clone/services/application/friends_controller.dart';
 import 'package:locket_clone/theme/app_colors.dart';
 import 'package:provider/provider.dart';
@@ -24,19 +23,7 @@ class HomeTopBar extends StatelessWidget {
             },
             icon: const Icon(Icons.person, color: AppColors.textPrimary),
           ),
-          const SizedBox(width: 1),
-          IconButton(
-            tooltip: 'Logout',
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await context.read<AuthController>().logout();
-              if (context.mounted) {
-                Navigator.of(
-                  context,
-                ).pushNamedAndRemoveUntil('/login', (route) => false);
-              }
-            },
-          ),
+
           // Nút Bạn bè
           TextButton.icon(
             onPressed: () {
