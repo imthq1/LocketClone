@@ -47,6 +47,7 @@ class AuthController extends ChangeNotifier {
       final loginRes = await _repo.login(email, password);
       _setResLogin(loginRes);
 
+      // Đặt tạm user cơ bản (để UI có thể hiển thị nhanh)
       final userInfo = loginRes.userLogin;
       _setUser(
         UserDTO(
@@ -55,6 +56,9 @@ class AuthController extends ChangeNotifier {
           fullname: userInfo.fullname,
         ),
       );
+
+      // 👉 Sau khi login xong, load lại user đầy đủ từ backend
+      await loadCurrentUser();
     } catch (e) {
       _setError(e.toString());
       _setUser(null);

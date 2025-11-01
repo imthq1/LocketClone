@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:locket_clone/core/storage/secure_storage.dart';
+import 'package:locket_clone/shared/cloudinary_helper.dart';
 import 'package:provider/provider.dart';
 
 import 'package:locket_clone/services/application/auth_controller.dart';
@@ -113,27 +114,25 @@ class _ChatScreenState extends State<ChatScreen> {
         if (f.body == null) return;
         final map = jsonDecode(f.body!);
 
-        // Tùy backend: nếu có "type" phân biệt READ_EVENT vs MESSAGE thì check ở đây
-        // Ở đây giả định đều là message DTO
         final msg = MessageDTO.fromJson(map);
         context.read<ChatController>().appendIncomingMessage(msg);
         _scrollToBottom();
       },
     );
 
-    // Nhận "đang nhập" từ người kia
+    // subcriber /user/queue/typing
     final subTyping = _stomp?.subscribe(
       destination: '/user/queue/typing',
-      callback: (StompFrame f) {
+      callback: (f) {
         if (f.body == null) return;
+        print('typing payload: ${f.body}'); // ← phải thấy
         final e = jsonDecode(f.body!) as Map<String, dynamic>;
-        // e.g. {conversationId: 1, userId: 2, typing: true}
-        if ((e['conversationId'] as int?) == conversationId) {
+        final cid = (e['conversationId'] as num?)?.toInt();
+        if (cid == conversationId) {
           final typing = e['typing'] == true;
           setState(() => _partnerTyping = typing);
           if (typing) {
-            // tắt sau 3s nếu không nhận thêm sự kiện
-            Future.delayed(const Duration(seconds: 3), () {
+            Future.delayed(const Duration(seconds: 5), () {
               if (mounted) setState(() => _partnerTyping = false);
             });
           }
@@ -182,12 +181,18 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _notifyTyping(bool typing) {
     final chat = context.read<ChatController>();
+    final user = context.read<AuthController>();
+    final currentUser = user.loginDTO;
     final convId = chat.conversation?.id;
     if (!_wsConnected || convId == null) return;
 
     _stomp?.send(
       destination: '/app/conversations/$convId/typing',
-      body: jsonEncode({'typing': typing}),
+      headers: {'content-type': 'application/json'},
+      body: jsonEncode({
+        'typing': typing,
+        'currentUserId': currentUser?.userLogin.id,
+      }),
     );
   }
 
@@ -451,7 +456,7 @@ class _Bubble extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: Image.network(
-                      imageUrl,
+                      buildCloudinaryUrl(imageUrl!),
                       width: 220,
                       height: 160,
                       fit: BoxFit.cover,
