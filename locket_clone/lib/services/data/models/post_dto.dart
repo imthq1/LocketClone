@@ -26,7 +26,7 @@ class PostDTO {
   final int id;
   final String caption;
   final String image;
-  final String visibility; // "friend" | "public" | "private"...
+  final String visibility;
   final DateTime? createdAt;
 
   final int? authorId;
@@ -57,7 +57,7 @@ class PostDTO {
     authorId: (json['authorId'] is num)
         ? (json['authorId'] as num).toInt()
         : null,
-    authorEmail: json['authorEmail'] as String?,
+    authorEmail: json['authorEmail'] as String,
     authorFullname: json['authorFullname'] as String?,
   );
 }

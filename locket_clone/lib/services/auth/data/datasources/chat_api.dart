@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:locket_clone/services/auth/data/models/chat_dto.dart';
 import 'package:locket_clone/services/data/datasources/auth_api.dart';
-import 'package:locket_clone/services/data/models/chat_dto.dart';
 
 class ChatApi {
   final Dio _dio;
@@ -74,7 +74,7 @@ class ChatApi {
         'content': content,
         if (image != null) 'image': image,
       };
-      final res = await _dio.post('/sendMessage', data: body);
+      final res = await _dio.post('/message/send', data: body);
       final json = _unwrap(res.data);
       return MessageDTO.fromJson(json);
     } on DioException catch (e) {

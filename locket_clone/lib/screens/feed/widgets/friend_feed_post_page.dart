@@ -27,7 +27,7 @@ class FriendFeedPostPage extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Thanh Actions
-          const FriendPostActions(),
+          FriendPostActions(post: post),
 
           const SizedBox(height: 120),
         ],

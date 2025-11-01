@@ -1,5 +1,5 @@
-const String kCloudName = 'dzf7ojogs';
-const String kCloudBase = 'https://res.cloudinary.com/$kCloudName/image/upload/';
+const String kCloudBase =
+    'https://res.cloudinary.com/dw4yj3kvq/image/upload/v1760248720/';
 
 String buildCloudinaryUrl(String image) {
   if (image.isEmpty) return '';
