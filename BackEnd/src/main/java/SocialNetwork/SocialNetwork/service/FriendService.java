@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class FriendService {
@@ -54,7 +55,7 @@ public class FriendService {
         return userDTO;
     }
     public boolean existByAdresseeIdAndSender(long adressee_id, String emailSender) {
-        User  userSendRequestFr = userRepository.findByEmail(emailSender);
+        User userSendRequestFr = userRepository.findByEmail(emailSender);
         return this.friendRequestRepository.existsByAddressee_IdAndRequester_Id(adressee_id,userSendRequestFr.getId());
     }
     public void sendRequestByQr(String email, String token) {
@@ -105,11 +106,18 @@ public class FriendService {
         String emailCurrent=SecurityUtil.getCurrentUserLogin().get();
         User userCurrent=userRepository.findByEmail(emailCurrent);
         User userSendRequestFr = userRepository.findByEmail(senderEmail);
-        FriendRequest friendRequest = this.friendRequestRepository.findByAddressee_EmailOrRequester_Email(emailCurrent,senderEmail);
+        FriendRequest friendRequest = friendRequestRepository.findFirstByAddressee_EmailAndRequester_EmailAndStatusOrderByCreatedAtDesc(
+                emailCurrent,
+                senderEmail,
+                friendStatus.pending);
         friendRequest.setStatus(friendStatus.accepted);
         friendRequestRepository.save(friendRequest);
         this.chatService.getOrCreateConversation(userCurrent,userSendRequestFr);
     }
+    public void deleteFrRqById(long id){
+        this.friendRequestRepository.deleteById(id);
+    }
+
     @Transactional()
     public List<FriendRequestItemDTO> listReceivedRequestsForCurrentUser() {
         String email = SecurityUtil.getCurrentUserLogin()
@@ -134,5 +142,9 @@ public class FriendService {
                 .build()
         ).toList();
     }
-
+    public void deleteFriendShip(long userId){
+        String email = SecurityUtil.getCurrentUserLogin().get();
+        User me = userRepository.findByEmail(email);
+        friendRequestRepository.deleteFriendShip(userId, me.getId());
+    }
 }
