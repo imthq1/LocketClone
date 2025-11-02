@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:locket_clone/services/data/models/chat_dto.dart';
-import 'package:locket_clone/services/data/models/chat_repository.dart';
+import 'package:locket_clone/services/repository/chat_repository.dart';
 
 class ChatController extends ChangeNotifier {
   final ChatRepository _repo;

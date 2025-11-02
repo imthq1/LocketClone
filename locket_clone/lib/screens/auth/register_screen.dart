@@ -13,9 +13,8 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _emailCtl = TextEditingController();
   final _fullnameCtl = TextEditingController();
-
+  final bool _isLoading = false;
   bool _isRegisterEnabled = false;
-  bool _isLoading = false;
 
   @override
   void initState() {
@@ -48,8 +47,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _submit() async {
-    // TODO: Bạn có thể thêm bước gọi API "check email exists" ở đây nếu muốn
-
     // Gói dữ liệu và chuyển sang màn hình tạo mật khẩu
     final args = {
       'fullname': _fullnameCtl.text.trim(),

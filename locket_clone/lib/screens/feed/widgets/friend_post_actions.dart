@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:locket_clone/services/data/models/post_dto.dart';
 import 'package:locket_clone/shared/cloudinary_helper.dart';

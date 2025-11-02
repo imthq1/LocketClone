@@ -1,13 +1,3 @@
-/// Khi server trả về 401 (Unauthorized) cho một request BẤT KỲ (trừ chính /auth/refresh),
-/// ta sẽ:
-///   1) Chạy refresh: POST /auth/refresh (cookie httpOnly 'refresh_token' sẽ được gửi tự động
-///      bởi CookieManager (mobile/desktop) hoặc trình duyệt (web, nếu withCredentials + HTTPS).
-///   2) Nếu refresh OK → lấy accessToken mới từ response, lưu vào SecureStorage.
-///   3) Dùng accessToken mới để RE-TRY request gốc (giữ nguyên method/data/params).
-///   4) Nếu refresh FAIL → trả lỗi 401 như cũ để UI quyết định (chuyển về Login).
-///
-/// Đồng bộ hoá: dùng mutex để tránh gọi refresh song song khi nhiều request cùng 401.
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart';
@@ -25,7 +15,6 @@ class RefreshInterceptor extends Interceptor {
   RefreshInterceptor(this._storage, this._dio);
 
   bool _isRefreshCall(RequestOptions o) {
-    // Path có thể là '/auth/refresh' hoặc '.../auth/refresh'
     return o.path.endsWith('/auth/refresh');
   }
 
@@ -35,12 +24,11 @@ class RefreshInterceptor extends Interceptor {
         err.response?.statusCode == 401 && !_isRefreshCall(err.requestOptions);
 
     if (!shouldTryRefresh) {
-      // Không phải 401, hoặc chính là call refresh → đẩy lỗi ra ngoài.
       return handler.next(err);
     }
 
     try {
-      // Nếu đang có một refresh chạy rồi → đợi nó xong.
+      // Nếu đang có một refresh chạy rồi => đợi nó xong.
       if (_refreshingFuture != null) {
         await _refreshingFuture;
       } else {
@@ -49,15 +37,14 @@ class RefreshInterceptor extends Interceptor {
         await _refreshingFuture;
       }
 
-      // Refresh xong (thành công) → retry request gốc với AT mới.
+      // Refresh xong (thành công) => retry request gốc với AT mới.
       final newResponse = await _retryWithNewToken(err.requestOptions);
       return handler.resolve(newResponse);
     } catch (e) {
-      // Refresh thất bại → xoá token (phòng hờ) và trả lỗi để UI điều hướng Login.
+      // Refresh thất bại => xoá token và trả lỗi để UI điều hướng Login.
       await _storage.deleteAccessToken();
       return handler.next(err);
     } finally {
-      // Bất kể thành/bại, reset mutex để lần sau còn chạy lại.
       _refreshingFuture = null;
     }
   }
@@ -89,26 +76,30 @@ class RefreshInterceptor extends Interceptor {
       );
     }
 
-    final Map<String, dynamic> payload = (raw['data'] is Map<String, dynamic>)
-        ? raw['data'] as Map<String, dynamic>
-        : raw;
+    // final Map<String, dynamic> payload = (raw['data'] is Map<String, dynamic>)
+    //     ? raw['data'] as Map<String, dynamic>
+    //     : raw;
 
-    const candidates = [
-      'accessToken',
-      'access_token',
-      'token',
-      'access',
-      'jwt',
-      'access-token',
-    ];
-    String? newAT;
-    for (final k in candidates) {
-      final v = payload[k];
-      if (v is String && v.isNotEmpty) {
-        newAT = v;
-        break;
-      }
-    }
+    final Map<String, dynamic> payload = raw['data'] as Map<String, dynamic>;
+
+    // const candidates = [
+    //   'accessToken',
+    //   'access_token',
+    //   'token',
+    //   'access',
+    //   'jwt',
+    //   'access-token',
+    // ];
+
+    String? newAT = payload['access_token'];
+
+    // for (final k in candidates) {
+    //   final v = payload[k];
+    //   if (v is String && v.isNotEmpty) {
+    //     newAT = v;
+    //     break;
+    //   }
+    // }
 
     if (newAT == null || newAT.isEmpty) {
       throw DioException(

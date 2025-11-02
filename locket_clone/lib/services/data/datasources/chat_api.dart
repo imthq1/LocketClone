@@ -7,7 +7,7 @@ class ChatApi {
   final Dio _dio;
   ChatApi(this._dio);
 
-  // ----- Helpers (giữ y hệt cách của AuthApi) -----
+  // ----- Helpers -----
   Map<String, dynamic> _unwrap(dynamic raw) {
     dynamic decoded = raw;
     if (raw is String) {

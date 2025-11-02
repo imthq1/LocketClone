@@ -40,11 +40,11 @@ class FriendApi {
     if (decoded is Map<String, dynamic>) {
       if (decoded.containsKey('data')) {
         final data = decoded['data'];
-        if (data is List) return {'list': data}; // cho các API trả List
-        if (data is Map<String, dynamic>) return data; // cho các API trả Object
-        return {'value': data}; // fallback
+        if (data is List) return {'list': data};
+        if (data is Map<String, dynamic>) return data;
+        return {'value': data};
       }
-      return decoded; // đã là payload cuối cùng
+      return decoded;
     }
     throw ApiException('Định dạng phản hồi không hợp lệ');
   }
@@ -53,10 +53,11 @@ class FriendApi {
     final status = e.response?.statusCode;
     final data = e.response?.data;
     String? message;
-    if (data is Map && data['message'] is String)
+    if (data is Map && data['message'] is String) {
       message = data['message'] as String;
-    else if (data is String && data.isNotEmpty)
+    } else if (data is String && data.isNotEmpty) {
       message = data;
+    }
     message ??= switch (e.type) {
       DioExceptionType.connectionTimeout => 'Kết nối server quá hạn.',
       DioExceptionType.sendTimeout => 'Gửi dữ liệu quá hạn.',
@@ -101,13 +102,12 @@ class FriendApi {
         '/searchUser',
         queryParameters: {'email': email},
       );
-      final data = _unwrap(res.data); // <-- giờ là Map của user
+      final data = _unwrap(res.data);
       return UserDTO.fromJson(data);
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) return null;
       throw _asApiException(e);
     } catch (e) {
-      // Bọc các lỗi parse khác (type cast, null, v.v.) cho dễ debug
       throw ApiException('Không đọc được dữ liệu người dùng: $e');
     }
   }
@@ -157,7 +157,6 @@ class FriendApi {
         '/acceptFr',
         queryParameters: {'emailSender': emailSender},
       );
-      // Backend trả 200 OK, không cần parse body
     } on DioException catch (e) {
       throw _asApiException(e);
     }

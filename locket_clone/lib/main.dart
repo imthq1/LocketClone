@@ -6,7 +6,7 @@ import 'package:locket_clone/services/application/chat_controller.dart';
 import 'package:locket_clone/services/application/friends_controller.dart';
 import 'package:locket_clone/services/data/datasources/chat_api.dart';
 import 'package:locket_clone/services/data/datasources/friend_api.dart';
-import 'package:locket_clone/services/data/models/chat_repository.dart';
+import 'package:locket_clone/services/repository/chat_repository.dart';
 import 'package:locket_clone/services/repository/friend_repository.dart';
 import 'package:locket_clone/services/repository/post_repository.dart';
 import 'package:provider/provider.dart';

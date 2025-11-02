@@ -167,7 +167,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     if (_isResending) {
       resendText = 'Đang gửi...';
     } else if (_resendCountdown > 0) {
-      resendText = 'Gửi lại sau ($_resendCountdown\s)';
+      resendText = 'Gửi lại sau ($_resendCountdown giây)';
     } else {
       resendText = 'Gửi lại mã';
     }

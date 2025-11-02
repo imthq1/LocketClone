@@ -17,7 +17,11 @@ class GoogleSignInButton extends StatelessWidget {
           shape: const StadiumBorder(),
           side: BorderSide(color: Colors.grey.shade300, width: 1),
         ),
-        icon: Image.asset('lib/assets/google_logo.png', height: 24.0, width: 24.0),
+        icon: Image.asset(
+          'lib/assets/google_logo.png',
+          height: 24.0,
+          width: 24.0,
+        ),
         label: const Text(
           'Tiếp tục với Google',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),

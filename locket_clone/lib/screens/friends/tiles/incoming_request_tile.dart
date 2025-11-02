@@ -9,6 +9,7 @@ class IncomingRequestTile extends StatelessWidget {
   final VoidCallback onReject;
 
   const IncomingRequestTile({
+    super.key,
     required this.item,
     required this.onAccept,
     required this.onReject,

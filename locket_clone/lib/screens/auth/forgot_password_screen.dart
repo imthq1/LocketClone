@@ -93,7 +93,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         isLoading || !_isContinueEnabled || _errorCountdown > 0;
 
     final String buttonLabel = _errorCountdown > 0
-        ? 'Thử lại sau ($_errorCountdown\s)'
+        ? 'Thử lại sau ($_errorCountdown giây)'
         : 'Tiếp tục';
 
     return Scaffold(

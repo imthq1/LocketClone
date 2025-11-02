@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:locket_clone/services/application/auth_controller.dart';
 import 'package:locket_clone/theme/app_colors.dart';

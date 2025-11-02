@@ -1,6 +1,3 @@
-import 'package:meta/meta.dart';
-
-@immutable
 class FriendRqSentItemDTO {
   final int requestId;
   final int targetUserId;
@@ -30,7 +27,6 @@ class FriendRqSentItemDTO {
   }
 }
 
-@immutable
 class PageMetaDTO {
   final int size;
   final int number;
@@ -52,7 +48,6 @@ class PageMetaDTO {
   );
 }
 
-@immutable
 class FriendRqSentPageDTO {
   final List<FriendRqSentItemDTO> content;
   final PageMetaDTO page;

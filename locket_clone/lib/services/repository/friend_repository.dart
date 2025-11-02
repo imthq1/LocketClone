@@ -6,8 +6,6 @@ import '../data/models/friend_request_sent_dto.dart';
 abstract class FriendRepository {
   Future<List<UserDTO>> getFriends();
   Future<List<FriendRequestItemDTO>> getFriendRequests();
-
-  /// Trả về null nếu không tìm thấy
   Future<UserDTO?> searchUser(String email);
   Future<void> sendFriendRequest(int addresseeId);
   Future<FriendRqSentPageDTO> getRequestsSent({int page, int size});
