@@ -2,9 +2,8 @@ enum VisibilityEnum { friend, custom, privates }
 
 class PostCreateDTO {
   final String caption;
-  final String image; // public_id kiểu "locket/xxx"
+  final String image;
   final VisibilityEnum visibility;
-  // optional: danh sách recipient nếu backend hỗ trợ
   final List<int>? recipientIds;
 
   const PostCreateDTO({
@@ -32,6 +31,7 @@ class PostDTO {
   final int? authorId;
   final String? authorEmail;
   final String? authorFullname;
+  final String? authorAvatar;
 
   PostDTO({
     required this.id,
@@ -42,6 +42,7 @@ class PostDTO {
     this.authorId,
     this.authorEmail,
     this.authorFullname,
+    this.authorAvatar,
   });
 
   factory PostDTO.fromJson(Map<String, dynamic> json) => PostDTO(
@@ -59,6 +60,7 @@ class PostDTO {
         : null,
     authorEmail: json['authorEmail'] as String?,
     authorFullname: json['authorFullname'] as String?,
+    authorAvatar: json['authorAvatar'] as String?,
   );
 }
 

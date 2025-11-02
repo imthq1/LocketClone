@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:locket_clone/services/data/models/post_dto.dart';
 import 'package:locket_clone/theme/app_colors.dart';
+import 'package:locket_clone/screens/friends/utils/initials.dart';
+import 'package:locket_clone/shared/cloudinary_helper.dart';
 
 class PostInfo extends StatelessWidget {
   final PostDTO post;
@@ -29,8 +31,9 @@ class PostInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final timeAgo = _formatTimestamp(post.createdAt);
-
-    final authorName = post.authorFullname ?? 'T';
+    final authorName = post.authorFullname ?? post.authorEmail ?? 'User';
+    final authorAvatar = post.authorAvatar;
+    final bool hasImage = authorAvatar != null && authorAvatar.isNotEmpty;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -38,7 +41,19 @@ class PostInfo extends StatelessWidget {
         CircleAvatar(
           radius: 12,
           backgroundColor: AppColors.fieldBackground,
-          child: Icon(Icons.person, size: 14, color: AppColors.textSecondary),
+          backgroundImage: hasImage
+              ? NetworkImage(buildCloudinaryUrl(authorAvatar))
+              : null,
+          child: hasImage
+              ? null
+              : Text(
+                  initialsFrom(authorName),
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 8,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
         ),
         const SizedBox(width: 8),
         Text(
