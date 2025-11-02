@@ -29,6 +29,10 @@ public class PostController {
     public ResponseEntity<Post> createPost(@RequestBody Post post) {
         return ResponseEntity.ok(this.postService.save(post));
     }
+    @DeleteMapping("/post/{id}")
+    public ResponseEntity<Post> deletePost(@PathVariable Long id) {
+        return ResponseEntity.ok(this.postService.deletePostById(id));
+    }
     @GetMapping("/feed")
     public ResponseEntity<Map<String, Object>> getFeed(
             @RequestParam(defaultValue = "0") int page,

@@ -31,6 +31,7 @@ public class Post {
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference(value = "post_user")
     private User user;
+
     @PrePersist
     protected void onCreate() {
         this.created_at = Instant.now();

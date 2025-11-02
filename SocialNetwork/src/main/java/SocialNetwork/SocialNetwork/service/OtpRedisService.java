@@ -86,16 +86,13 @@ public class OtpRedisService {
         );
     }
 
-    /** Xác thực OTP (so sánh chuỗi) */
     public boolean verifyOtp(String email, String purpose, String otpInput, boolean deleteOnSuccess) {
         final ValueOperations<String, String> ops = redis.opsForValue();
         final String kCode = keyCode(purpose, email);
         final String kAttempts = keyAttempts(purpose, email);
 
-        // Lấy OTP đang lưu
         String storedOtp = ops.get(kCode);
         if (storedOtp == null) {
-            // Hết hạn hoặc chưa gửi
             return false;
         }
 
@@ -107,7 +104,6 @@ public class OtpRedisService {
         } catch (NumberFormatException ignored) {}
 
         if (attempts >= MAX_ATTEMPTS) {
-            // Quá số lần → buộc gửi lại
             redis.delete(kCode);
             redis.delete(kAttempts);
             return false;
@@ -121,7 +117,6 @@ public class OtpRedisService {
             }
             return true;
         } else {
-            // Tăng attempts, giữ nguyên TTL như kCode
             long ttlSec = Math.max(0, redis.getExpire(kCode, TimeUnit.SECONDS));
             ops.set(kAttempts, Integer.toString(attempts + 1), Duration.ofSeconds(ttlSec));
             return false;

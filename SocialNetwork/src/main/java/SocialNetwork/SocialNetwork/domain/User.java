@@ -2,6 +2,7 @@
 package SocialNetwork.SocialNetwork.domain;
 
 import SocialNetwork.SocialNetwork.util.SecurityUtil;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -74,6 +75,7 @@ public class User {
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
+    @JsonBackReference(value = "post_user")
     private List<Post> posts = new ArrayList<>();
 
     public void addSession(Session s) {

@@ -23,6 +23,9 @@ public class PostService {
         this.userService = userService;
         this.securityUtil = securityUtil;
     }
+    public Post deletePostById(Long postId) {
+        return this.postRepository.deletePostById(postId);
+    }
     public Post save(Post post) {
         post.setUser(userService.getUserByEmail(SecurityUtil.getCurrentUserLogin().get()));
         return postRepository.save(post);

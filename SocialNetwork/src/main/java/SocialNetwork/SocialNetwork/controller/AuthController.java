@@ -146,6 +146,21 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, rtCookie.toString())
                 .body(res);
     }
+    @PutMapping("/auth/reName")
+    public ResponseEntity<?> reName(@RequestParam String newName){
+        User user=this.userService.findByEmail(SecurityUtil.getCurrentUserLogin().get());
+        user.setFullname(newName);
+        this.userService.save(user);
+        return ResponseEntity.ok("Fullname updated successfully");
+    }
+    @PutMapping("/auth/Avt")
+    public ResponseEntity<?> reAvt(@RequestParam String Avt)
+    {
+        User user=this.userService.findByEmail(SecurityUtil.getCurrentUserLogin().get());
+        user.setImageUrl(Avt);
+        this.userService.save(user);
+        return ResponseEntity.ok("Image updated successfully");
+    }
     @PostMapping("/auth/refresh")
     public ResponseEntity<ResLoginDTO> refresh(@CookieValue(name = RT_COOKIE, required = false) String rtCookieVal)
             throws IdInValidException {

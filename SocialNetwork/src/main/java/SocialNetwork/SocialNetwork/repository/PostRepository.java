@@ -46,4 +46,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             @Param("accepted") friendStatus accepted,
             Pageable pageable
     );
+    Post deletePostById(Long id);
 }
