@@ -175,4 +175,33 @@ class AuthController extends ChangeNotifier {
       _setLoading(false);
     }
   }
+
+  Future<bool> updateFullname(String newName) async {
+    _setError(null);
+    _setLoading(true);
+    try {
+      await _repo.updateFullname(newName);
+      await loadCurrentUser();
+      return true;
+    } catch (e) {
+      _setError(e.toString());
+      _setLoading(false);
+      return false;
+    } finally {}
+  }
+
+  Future<bool> updateAvatar(String filePath) async {
+    _setError(null);
+    _setLoading(true);
+    try {
+      final publicId = await _repo.uploadAvatar(filePath, folder: 'avt');
+      await _repo.updateAvatar(publicId);
+      await loadCurrentUser();
+      return true;
+    } catch (e) {
+      _setError(e.toString());
+      _setLoading(false);
+      return false;
+    } finally {}
+  }
 }

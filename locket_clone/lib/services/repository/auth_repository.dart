@@ -19,6 +19,9 @@ abstract class AuthRepository {
   Future<void> sendResetOtp(String email);
   Future<void> verifyResetOtp(String email, String otp);
   Future<void> resetPassword(String email, String newPassword);
+  Future<String> uploadAvatar(String filePath, {String folder = 'avt'});
+  Future<void> updateFullname(String newName);
+  Future<void> updateAvatar(String publicId);
 }
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -92,5 +95,20 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> resetPassword(String email, String newPassword) {
     return _api.resetPassword(email, newPassword);
+  }
+
+  @override
+  Future<String> uploadAvatar(String filePath, {String folder = 'avt'}) {
+    return _api.uploadImage(filePath: filePath, folder: folder);
+  }
+
+  @override
+  Future<void> updateFullname(String newName) {
+    return _api.updateFullname(newName);
+  }
+
+  @override
+  Future<void> updateAvatar(String publicId) {
+    return _api.updateAvatar(publicId);
   }
 }

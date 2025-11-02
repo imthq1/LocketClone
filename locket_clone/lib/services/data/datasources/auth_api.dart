@@ -173,4 +173,53 @@ class AuthApi {
       throw _asApiException(e);
     }
   }
+
+  Future<String> uploadImage({
+    required String filePath,
+    String folder = 'avt',
+  }) async {
+    try {
+      final form = FormData.fromMap({
+        'folder': folder,
+        'file': await MultipartFile.fromFile(filePath),
+      });
+      final res = await _dio.post(
+        '/upload/image',
+        data: form,
+        options: Options(contentType: 'multipart/form-data'),
+      );
+      final json = _unwrap(res.data);
+      final publicId = json['url'] as String?;
+      if (publicId == null || publicId.isEmpty) {
+        throw ApiException('Upload thành công nhưng thiếu trường url');
+      }
+      return publicId;
+    } on DioException catch (e) {
+      throw _asApiException(e);
+    }
+  }
+
+  Future<void> updateFullname(String newName) async {
+    try {
+      await _dio.put(
+        '/auth/reName',
+        queryParameters: {'newName': newName},
+        options: Options(responseType: ResponseType.plain),
+      );
+    } on DioException catch (e) {
+      throw _asApiException(e);
+    }
+  }
+
+  Future<void> updateAvatar(String avatarPublicId) async {
+    try {
+      await _dio.put(
+        '/auth/Avt',
+        queryParameters: {'Avt': avatarPublicId},
+        options: Options(responseType: ResponseType.plain),
+      );
+    } on DioException catch (e) {
+      throw _asApiException(e);
+    }
+  }
 }
