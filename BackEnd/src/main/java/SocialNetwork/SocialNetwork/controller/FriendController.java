@@ -44,7 +44,7 @@ public class FriendController {
     @PostMapping("/sendFriendByQrCode/{token}")
     @ApiMessage("send ")
     public ResponseEntity<Void> sendFriendByQrCode(@PathVariable String token)
-    throws Exception{
+            throws Exception{
         String email = SecurityUtil.getCurrentUserLogin().get();
         this.friendService.sendRequestByQr(email,token);
         return ResponseEntity.ok().build();
@@ -100,16 +100,31 @@ public class FriendController {
         List<FriendRequestItemDTO> data = friendService.listReceivedRequestsForCurrentUser();
         return ResponseEntity.ok(data);
     }
+
     @GetMapping("/listFriendSend")
     @ApiMessage("Get list friend sended")
     public ResponseEntity<Page<FriendRequestBySender>> listFriendSend(Pageable pageable) {
         String email = SecurityUtil.getCurrentUserLogin().get();
         return ResponseEntity.ok(this.friendService.listFriendBySender(email, friendStatus.pending,pageable));
     }
+
     @GetMapping("/searchUser")
     @ApiMessage("Search a User")
     public ResponseEntity<UserDTO> searchUser(@RequestParam String email) {
-    return ResponseEntity.ok(this.friendService.searchUser(email));
+        return ResponseEntity.ok(this.friendService.searchUser(email));
     }
 
+    @DeleteMapping("/friendRq/{id}")
+    @ApiMessage("Delete a friend request")
+    public ResponseEntity<Void> deleteFriendRq(@PathVariable long id) {
+        friendService.deleteFrRqById(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/friendShip/{id}")
+    @ApiMessage("Delete a friendship")
+    public ResponseEntity<Void> deleteFriendShip(@PathVariable long id) {
+        friendService.deleteFriendShip(id);
+        return ResponseEntity.ok().build();
+    }
 }
