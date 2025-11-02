@@ -5,9 +5,21 @@ import 'package:locket_clone/services/data/models/friend_request_dto.dart';
 import 'package:locket_clone/services/repository/friend_repository.dart';
 import '../data/models/friend_request_sent_dto.dart';
 
+enum RelationStatus { self, friend, outgoing, incoming, none }
+
 class FriendsController extends ChangeNotifier {
   final FriendRepository _repo;
-  FriendsController(this._repo);
+  FriendsController(this._repo, {int? meId, String? meEmail}) {
+    _meId = meId;
+    _meEmail = _normalizeEmail(meEmail);
+  }
+
+  int? _meId;
+  String? _meEmail; // lowercase để so sánh
+  void setMe({int? id, String? email}) {
+    _meId = id;
+    _meEmail = _normalizeEmail(email);
+  }
 
   // ====== STATE CHUNG ======
   bool _loading = false;
@@ -179,9 +191,23 @@ class FriendsController extends ChangeNotifier {
     final target = _searchResult;
     if (target == null) return false;
 
-    // Giả định UserDTO có field `id` là int (nếu tên khác, đổi lại cho đúng)
-    final int? id = target.id;
-    if (id == null) {
+    final tId = target.id;
+    final tEmailNorm = _normalizeEmail(target.email);
+
+    // Chặn gửi cho chính mình (dù UI có lỡ bật nút)
+    if ((_meId != null && tId != null && tId == _meId) ||
+        (_meEmail != null && _meEmail == tEmailNorm)) {
+      _setError('Không thể kết bạn với chính mình.');
+      notifyListeners();
+      return false;
+    }
+
+    // Chỉ cho gửi khi chưa có quan hệ
+    if (relationTo(target) != RelationStatus.none) {
+      return false;
+    }
+
+    if (tId == null) {
       _setError('Không tìm thấy ID người dùng.');
       return false;
     }
@@ -191,13 +217,8 @@ class FriendsController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _repo.sendFriendRequest(id);
-      // Option: clear search sau khi gửi OK
+      await _repo.sendFriendRequest(tId);
       clearSearch();
-
-      // Option: refresh danh sách lời mời/friends nếu backend có thay đổi
-      // await refresh();
-
       return true;
     } catch (e) {
       _setError(e.toString());
@@ -233,7 +254,7 @@ class FriendsController extends ChangeNotifier {
   bool _accepting = false;
   bool get isAccepting => _accepting;
 
-  /// ✅ Chấp nhận lời mời kết bạn
+  ///  Chấp nhận lời mời kết bạn
   Future<bool> acceptRequest(FriendRequestItemDTO item) async {
     final email = item.requesterEmail;
     if (email.isEmpty) return false;
@@ -261,7 +282,12 @@ class FriendsController extends ChangeNotifier {
     }
   }
 
-  Future<void> refresh() async => load();
+  Future<void> refresh() async {
+    await Future.wait([
+      load(), // bạn bè + lời mời gửi tới
+      loadSent(reset: true), // reset & tải lại "lời mời bạn đã gửi"
+    ]);
+  }
 
   /// Từ chối lời mời gửi tới mình
   Future<bool> rejectIncoming(FriendRequestItemDTO item) async {
@@ -300,6 +326,68 @@ class FriendsController extends ChangeNotifier {
       _setError(e.toString());
       return false;
     }
+  }
+
+  RelationStatus relationTo(UserDTO u) {
+    final uId = u.id;
+    final uEmailNorm = _normalizeEmail(u.email);
+
+    // 1) Chính mình
+    if ((_meId != null && uId != null && uId == _meId) ||
+        (_meEmail != null && _meEmail == uEmailNorm)) {
+      return RelationStatus.self;
+    }
+
+    // 2) Đã là bạn
+    if (_friends.any(
+      (f) =>
+          (f.id != null && uId != null && f.id == uId) ||
+          (_normalizeEmail(f.email) == uEmailNorm),
+    )) {
+      return RelationStatus.friend;
+    }
+
+    // 3) Họ đã gửi lời mời cho bạn (incoming)
+    if (_incomingRequests.any(
+      (r) =>
+          (r.requesterId != null && uId != null && r.requesterId == uId) ||
+          (_normalizeEmail(r.requesterEmail) == uEmailNorm),
+    )) {
+      return RelationStatus.incoming;
+    }
+
+    // 4) Bạn đã gửi lời mời cho họ (outgoing)
+    if (_sentRequests.any((s) {
+      final recvId = s.targetUserId; // đổi đúng theo DTO của bạn
+      final recvEmailNorm = _normalizeEmail(s.targetEmail);
+      return (recvId != null && uId != null && recvId == uId) ||
+          (recvEmailNorm == uEmailNorm);
+    })) {
+      return RelationStatus.outgoing;
+    }
+
+    return RelationStatus.none;
+  }
+
+  // tiện cho UI: quan hệ của kết quả search hiện tại
+  RelationStatus? get searchRelation =>
+      (_searchResult == null) ? null : relationTo(_searchResult!);
+
+  String _normalizeEmail(String? raw) {
+    if (raw == null) return '';
+    var s = raw.trim().toLowerCase();
+    final at = s.indexOf('@');
+    if (at <= 0) return s;
+
+    var local = s.substring(0, at);
+    var domain = s.substring(at + 1);
+
+    if (domain == 'gmail.com') {
+      final plus = local.indexOf('+');
+      if (plus >= 0) local = local.substring(0, plus);
+      local = local.replaceAll('.', '');
+    }
+    return '$local@$domain';
   }
 
   @override

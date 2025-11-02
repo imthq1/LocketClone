@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:locket_clone/services/application/auth_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:locket_clone/services/application/friends_controller.dart';
 import 'package:locket_clone/theme/app_colors.dart';
 import 'barrels/tiles.dart';
 import 'barrels/widget.dart';
+import 'barrels/confirm.dart';
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({super.key});
@@ -20,6 +22,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
     super.initState();
     Future.microtask(() {
       final c = context.read<FriendsController>();
+      final me = context.read<AuthController>().user;
+      c.setMe(id: me?.id, email: me?.email);
       c.load(); // bạn bè + lời mời gửi tới
       c.loadSent(reset: true); // danh sách đã gửi (pending)
     });
@@ -44,7 +48,13 @@ class _FriendsScreenState extends State<FriendsScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
         ),
-        title: const Text('Bạn bè của bạn'),
+        title: const Text(
+          'Bạn bè của bạn',
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
       body: RefreshIndicator(
         onRefresh: ctrl.refresh,
@@ -108,6 +118,15 @@ class _FriendsScreenState extends State<FriendsScreen> {
                   return FriendTile(
                     user: user,
                     onUnfriend: () async {
+                      final yes = await confirm(
+                        context,
+                        title: 'Hủy kết bạn',
+                        message:
+                            'Bạn có chắc muốn hủy kết bạn với ${user.fullname}?',
+                        confirmText: 'Hủy kết bạn',
+                      );
+                      if (!yes) return;
+
                       final ok = await context
                           .read<FriendsController>()
                           .unfriend(user);
@@ -166,6 +185,15 @@ class _FriendsScreenState extends State<FriendsScreen> {
                       );
                     },
                     onReject: () async {
+                      final yes = await confirm(
+                        context,
+                        title: 'Từ chối lời mời',
+                        message:
+                            'Bạn có chắc muốn hủy lời mời kết bạn của ${item.requesterFullname} tới bạn?',
+                        confirmText: 'Từ chối',
+                      );
+                      if (!yes) return;
+
                       final ok = await context
                           .read<FriendsController>()
                           .rejectIncoming(item);
@@ -210,9 +238,20 @@ class _FriendsScreenState extends State<FriendsScreen> {
                   return SentRequestTile(
                     item: item,
                     onCancel: () async {
+                      final name = item.targetFullname;
+                      'người dùng này';
+                      final yes = await confirm(
+                        context,
+                        title: 'Huỷ lời mời đã gửi',
+                        message:
+                            'Bạn có chắc muốn huỷ lời mời kết bạn tới $name?',
+                        confirmText: 'Huỷ lời mời',
+                      );
+                      if (!yes) return;
+
                       final ok = await context
                           .read<FriendsController>()
-                          .cancelSent(item.requestId); // gọi controller
+                          .cancelSent(item.requestId);
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
