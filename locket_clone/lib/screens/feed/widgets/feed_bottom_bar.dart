@@ -27,9 +27,7 @@ class FeedBottomBar extends StatelessWidget {
           ),
 
           // Nút Chụp
-          ShutterButton(onPressed: onShutterPressed, size: 84),
-
-          // Đối trọng để giữ nút Shutter ở giữa
+          ShutterButton(onPressed: onShutterPressed, size: 56),
           const SizedBox(width: 32),
         ],
       ),

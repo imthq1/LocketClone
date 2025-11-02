@@ -6,7 +6,6 @@ class SendControls extends StatelessWidget {
   final VoidCallback? onSendPressed;
 
   final double cancelIconSize;
-  final double sendButtonSize;
   final double sendIconSize;
 
   const SendControls({
@@ -14,7 +13,6 @@ class SendControls extends StatelessWidget {
     this.onCancelPressed,
     this.onSendPressed,
     this.cancelIconSize = 36.0,
-    this.sendButtonSize = 72.0,
     this.sendIconSize = 32.0,
   });
 
@@ -35,18 +33,10 @@ class SendControls extends StatelessWidget {
           // Nút Gửi (Send)
           GestureDetector(
             onTap: onSendPressed,
-            child: Container(
-              width: sendButtonSize,
-              height: sendButtonSize,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.grey.shade800,
-              ),
-              child: Icon(
-                Icons.send_rounded,
-                color: AppColors.textPrimary,
-                size: sendIconSize,
-              ),
+            child: Icon(
+              Icons.send_rounded,
+              color: AppColors.textPrimary,
+              size: sendIconSize,
             ),
           ),
           SizedBox(width: cancelIconSize),

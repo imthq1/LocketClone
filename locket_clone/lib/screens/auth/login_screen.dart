@@ -52,10 +52,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (!mounted) return;
     if (auth.error != null) {
-      // String errorMessage = auth.error!;
-      // final apiErrorPrefix = RegExp(r'ApiException\(\d*\): ');
-      // errorMessage = errorMessage.replaceFirst(apiErrorPrefix, '');
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
@@ -98,12 +94,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Image.asset(
-                            //   'lib/assets/locket_app_icon.png',
-                            //   height: 64,
-                            //   width: 64,
-                            // ),
-                            // const SizedBox(height: 16),
                             Align(
                               alignment: Alignment.centerLeft,
                               child: const Text(
@@ -118,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: 28),
                             PrimaryAuthInput(
                               controller: _emailCtl,
-                              hintText: 'your-mail@gmail.com',
+                              hintText: 'Nhập email của bạn',
                               keyboardType: TextInputType.emailAddress,
                             ),
                             const SizedBox(height: 14),

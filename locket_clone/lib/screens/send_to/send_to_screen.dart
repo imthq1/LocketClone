@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:locket_clone/screens/send_to/send_to_controller.dart';
-import 'package:locket_clone/screens/send_to/widgets/audience_selector.dart';
 import 'package:locket_clone/screens/send_to/widgets/picture_preview.dart';
 import 'package:locket_clone/screens/send_to/widgets/send_controls.dart';
 import 'package:locket_clone/screens/send_to/widgets/send_to_top_bar.dart';
@@ -205,14 +204,10 @@ class _SendToScreenViewState extends State<_SendToScreenView> {
                     child: SendControls(
                       onCancelPressed: () => _onCancel(context),
                       onSendPressed: () => _onSend(context),
-                      cancelIconSize: 35,
-                      sendButtonSize: 90,
-                      sendIconSize: 60,
+                      cancelIconSize: 30,
+                      sendIconSize: 80,
                     ),
                   ),
-                  const Spacer(),
-                  // 4. Thanh chọn đối tượng
-                  const AudienceSelector(),
                 ],
               ),
 

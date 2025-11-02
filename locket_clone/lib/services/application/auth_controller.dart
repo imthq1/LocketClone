@@ -38,8 +38,6 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Đăng nhập và cập nhật thông tin user cơ bản từ chính phản hồi của API login.
-  /// Việc lấy thông tin đầy đủ (getCurrentUser) sẽ do AuthGate xử lý.
   Future<void> login(String email, String password) async {
     _setError(null);
     _setLoading(true);
@@ -47,7 +45,6 @@ class AuthController extends ChangeNotifier {
       final loginRes = await _repo.login(email, password);
       _setResLogin(loginRes);
 
-      // Đặt tạm user cơ bản (để UI có thể hiển thị nhanh)
       final userInfo = loginRes.userLogin;
       _setUser(
         UserDTO(
@@ -57,7 +54,6 @@ class AuthController extends ChangeNotifier {
         ),
       );
 
-      // 👉 Sau khi login xong, load lại user đầy đủ từ backend
       await loadCurrentUser();
     } catch (e) {
       _setError(e.toString());
@@ -67,7 +63,6 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  /// Đăng ký xong đăng nhập luôn.
   Future<void> registerThenLogin({
     required String email,
     required String password,
@@ -87,7 +82,6 @@ class AuthController extends ChangeNotifier {
       );
       _setResLogin(u);
 
-      // Tương tự hàm login, cập nhật user tạm thời
       final userInfo = u.userLogin;
       _setUser(
         UserDTO(
@@ -104,7 +98,6 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  /// Khi mở app: AuthGate sẽ gọi hàm này.
   Future<void> loadCurrentUser() async {
     _setError(null);
     _setLoading(true);
@@ -124,7 +117,6 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  /// Đăng xuất.
   Future<void> logout() async {
     _setError(null);
     _setLoading(true);
@@ -134,6 +126,51 @@ class AuthController extends ChangeNotifier {
     } catch (e) {
       _setError(e.toString());
       _setUser(null);
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<bool> sendResetOtp(String email) async {
+    _setError(null);
+    _setLoading(true);
+    try {
+      await _repo.sendResetOtp(email);
+      return true;
+    } catch (e) {
+      _setError(e.toString());
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<bool> verifyResetOtp(String email, String otp) async {
+    _setError(null);
+    _setLoading(true);
+    try {
+      await _repo.verifyResetOtp(email, otp);
+      return true;
+    } catch (e) {
+      _setError(e.toString());
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<bool> resetPassword({
+    required String email,
+    required String newPassword,
+  }) async {
+    _setError(null);
+    _setLoading(true);
+    try {
+      await _repo.resetPassword(email, newPassword);
+      return true;
+    } catch (e) {
+      _setError(e.toString());
+      return false;
     } finally {
       _setLoading(false);
     }

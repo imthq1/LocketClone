@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:locket_clone/services/application/auth_controller.dart';
 import 'package:locket_clone/services/application/friends_controller.dart';
 import 'package:locket_clone/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 
 class HomeTopBar extends StatelessWidget {
-  final sumUser;
-  const HomeTopBar({super.key, this.sumUser});
+  final int sumUser;
+  const HomeTopBar({super.key, this.sumUser = 0});
 
   @override
   Widget build(BuildContext context) {
-    // Giả sử số lượng bạn bè
     final friendCount = sumUser;
 
     return Padding(
@@ -21,26 +19,11 @@ class HomeTopBar extends StatelessWidget {
           // Nút Profile
           IconButton(
             onPressed: () {
-              /* TODO: Mở màn hình profile */
+              Navigator.pushReplacementNamed(context, '/profile');
             },
-            icon: const Icon(
-              Icons.person_outline,
-              color: AppColors.textPrimary,
-            ),
+            icon: const Icon(Icons.person, color: AppColors.textPrimary),
           ),
-          const SizedBox(width: 1),
-          IconButton(
-            tooltip: 'Logout',
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await context.read<AuthController>().logout();
-              if (context.mounted) {
-                Navigator.of(
-                  context,
-                ).pushNamedAndRemoveUntil('/login', (route) => false);
-              }
-            },
-          ),
+
           // Nút Bạn bè
           TextButton.icon(
             onPressed: () {

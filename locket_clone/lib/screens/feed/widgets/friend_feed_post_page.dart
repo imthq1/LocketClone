@@ -10,7 +10,7 @@ class FriendFeedPostPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
       height: double.infinity,
       child: Column(
@@ -19,12 +19,12 @@ class FriendFeedPostPage extends StatelessWidget {
           // Ảnh + caption
           PostCard(post: post),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
 
           // Thông tin thời gian
           PostInfo(post: post),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 80),
 
           // Thanh Actions
           FriendPostActions(post: post),

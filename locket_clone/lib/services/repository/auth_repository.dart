@@ -16,6 +16,9 @@ abstract class AuthRepository {
   Future<void> logout();
   Future<ResLoginDTO> refresh();
   Future<bool> hasAccessToken();
+  Future<void> sendResetOtp(String email);
+  Future<void> verifyResetOtp(String email, String otp);
+  Future<void> resetPassword(String email, String newPassword);
 }
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -26,14 +29,8 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<ResLoginDTO> login(String email, String password) async {
-    // 1) Gọi API /auth/login để lấy accessToken và thông tin user cơ bản.
     final loginResponse = await _api.login(email: email, password: password);
-
-    // 2) Lưu access token vào storage để các request sau sử dụng.
     await _storage.writeAccessToken(loginResponse.accessToken);
-
-    // 3) Trả về toàn bộ đối tượng response.
-    // Controller sẽ dùng thông tin này để cập nhật state tạm thời.
     return loginResponse;
   }
 
@@ -45,7 +42,6 @@ class AuthRepositoryImpl implements AuthRepository {
     String? address,
     String? imageUrl,
   }) async {
-    // 1) Đăng ký tài khoản mới.
     await _api.register(
       email: email,
       password: password,
@@ -53,15 +49,11 @@ class AuthRepositoryImpl implements AuthRepository {
       address: address,
       imageUrl: imageUrl,
     );
-
-    // 2) Đăng nhập ngay sau khi đăng ký thành công.
     return login(email, password);
   }
 
   @override
   Future<UserDTO> getCurrentUser() {
-    // Vẫn giữ nguyên hàm này để AuthGate hoặc các nơi khác có thể gọi
-    // để lấy thông tin user đầy đủ (bao gồm cả danh sách bạn bè).
     return _api.getAccount();
   }
 
@@ -70,7 +62,6 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await _api.logout();
     } finally {
-      // Dù server lỗi, vẫn xoá AT local để đảm bảo người dùng phải đăng nhập lại.
       await _storage.deleteAccessToken();
     }
   }
@@ -86,5 +77,20 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<bool> hasAccessToken() async {
     final at = await _storage.readAccessToken();
     return at != null && at.isNotEmpty;
+  }
+
+  @override
+  Future<void> sendResetOtp(String email) {
+    return _api.sendResetOtp(email);
+  }
+
+  @override
+  Future<void> verifyResetOtp(String email, String otp) {
+    return _api.verifyResetOtp(email, otp);
+  }
+
+  @override
+  Future<void> resetPassword(String email, String newPassword) {
+    return _api.resetPassword(email, newPassword);
   }
 }

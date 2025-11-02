@@ -57,7 +57,7 @@ class PostDTO {
     authorId: (json['authorId'] is num)
         ? (json['authorId'] as num).toInt()
         : null,
-    authorEmail: json['authorEmail'] as String,
+    authorEmail: json['authorEmail'] as String?,
     authorFullname: json['authorFullname'] as String?,
   );
 }

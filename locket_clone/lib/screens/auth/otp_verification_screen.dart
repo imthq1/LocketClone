@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:locket_clone/services/application/auth_controller.dart';
 import 'package:locket_clone/theme/app_colors.dart';
 import 'package:locket_clone/screens/auth/widgets/primary_auth_button.dart';
 import 'package:locket_clone/screens/auth/widgets/primary_auth_input.dart';
+import 'package:provider/provider.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   const OtpVerificationScreen({super.key});
@@ -12,23 +15,29 @@ class OtpVerificationScreen extends StatefulWidget {
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final _otpCtl = TextEditingController();
   bool _isContinueEnabled = false;
-  bool _isLoading = false;
   bool _isResending = false;
+  Timer? _resendTimer;
+  int _resendCountdown = 0;
+  Timer? _verifyErrorTimer;
+  String _verifyButtonLabel = 'Xác nhận';
+  bool _isVerifyError = false;
 
   @override
   void initState() {
     super.initState();
     _otpCtl.addListener(_validateInput);
+    _startResendCountdown();
   }
 
   @override
   void dispose() {
     _otpCtl.removeListener(_validateInput);
     _otpCtl.dispose();
+    _resendTimer?.cancel();
+    _verifyErrorTimer?.cancel();
     super.dispose();
   }
 
-  /// Chỉ bật nút khi nhập đủ 6 chữ số
   void _validateInput() {
     final otp = _otpCtl.text.trim();
     final bool isEnabled = otp.length == 6;
@@ -39,7 +48,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     }
   }
 
-  /// Lấy email được truyền từ màn hình "Quên mật khẩu"
   String? _getEmailArg() {
     try {
       return ModalRoute.of(context)!.settings.arguments as String?;
@@ -48,70 +56,122 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     }
   }
 
-  /// Xử lý khi nhấn nút "Xác nhận"
+  void _startResendCountdown() {
+    _resendTimer?.cancel();
+    setState(() {
+      _resendCountdown = 60;
+    });
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_resendCountdown > 0) {
+        setState(() {
+          _resendCountdown--;
+        });
+      } else {
+        timer.cancel();
+        _resendTimer = null;
+      }
+    });
+  }
+
+  void _showVerifyError() {
+    _verifyErrorTimer?.cancel();
+    setState(() {
+      _isVerifyError = true;
+      _verifyButtonLabel = 'OTP không chính xác';
+    });
+
+    _verifyErrorTimer = Timer(const Duration(seconds: 2), () {
+      setState(() {
+        _isVerifyError = false;
+        _verifyButtonLabel = 'Xác nhận';
+        _verifyErrorTimer = null;
+      });
+    });
+  }
+
   Future<void> _submit() async {
     if (!_isContinueEnabled) return;
-    setState(() => _isLoading = true);
 
     final email = _getEmailArg();
     final otp = _otpCtl.text.trim();
+    final auth = context.read<AuthController>();
 
-    // TODO: Triển khai gọi API xác thực OTP
-    // await context.read<AuthController>().verifyOtp(email, otp);
+    if (email == null) {
+      _showVerifyError();
+      return;
+    }
 
-    // Giả lập một cuộc gọi API
-    await Future.delayed(const Duration(seconds: 1));
-    // final bool isOtpValid;
+    final bool isOtpValid = await auth.verifyResetOtp(email, otp);
 
     if (!mounted) return;
-    setState(() => _isLoading = false);
 
-    // if (isOtpValid) {
-    //   // Chuyển đến màn hình Đặt lại mật khẩu, mang theo email và OTP đã xác thực
-    //   Navigator.of(context).pushNamedAndRemoveUntil(
-    //     '/reset-password',
-    //     (route) => route.isFirst, // Giữ lại màn hình Welcome/Login
-    //     arguments: {'email': email, 'otp': otp},
-    //   );
-    // } else {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(
-    //       content: const Text('Mã OTP không hợp lệ. Vui lòng thử lại.'),
-    //       backgroundColor: AppColors.error.withOpacity(0.9),
-    //     ),
-    //   );
-    // }
-
-    Navigator.of(context).pushNamedAndRemoveUntil(
-      '/reset-password',
-      (route) => route.isFirst, // Giữ lại màn hình Welcome/Login
-      arguments: {'email': email, 'otp': otp},
-    );
+    if (isOtpValid) {
+      _resendTimer?.cancel();
+      _verifyErrorTimer?.cancel();
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/reset-password',
+        (route) => route.isFirst,
+        arguments: {'email': email},
+      );
+    } else {
+      _showVerifyError();
+    }
   }
 
-  /// Xử lý khi nhấn "Gửi lại mã"
   Future<void> _resendOtp() async {
     setState(() => _isResending = true);
     final email = _getEmailArg();
+    final auth = context.read<AuthController>();
 
-    // TODO: Gọi API gửi lại mã
-    // await context.read<AuthController>().resendOtp(email);
+    if (email == null) {
+      setState(() => _isResending = false);
+      return;
+    }
 
-    await Future.delayed(const Duration(seconds: 1));
+    final bool success = await auth.sendResetOtp(email);
+
     if (!mounted) return;
     setState(() => _isResending = false);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Đã gửi lại mã tới $email'),
-        backgroundColor: AppColors.success.withValues(alpha: 0.9),
-      ),
-    );
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Đã gửi lại mã tới $email',
+            style: const TextStyle(color: AppColors.textPrimary),
+          ),
+          backgroundColor: AppColors.success.withValues(alpha: 0.9),
+        ),
+      );
+      // Bắt đầu đếm ngược 60s (lần nữa)
+      _startResendCountdown();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            auth.error ?? 'Gửi lại mã thất bại.',
+            style: const TextStyle(color: AppColors.textPrimary),
+          ),
+          backgroundColor: AppColors.error.withValues(alpha: 0.9),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final email = _getEmailArg();
+    final isLoading = context.watch<AuthController>().isLoading;
+    final bool canResend = !_isResending && _resendCountdown == 0 && !isLoading;
+    String resendText;
+    if (_isResending) {
+      resendText = 'Đang gửi...';
+    } else if (_resendCountdown > 0) {
+      resendText = 'Gửi lại sau ($_resendCountdown\s)';
+    } else {
+      resendText = 'Gửi lại mã';
+    }
+    final bool canSubmit = _isContinueEnabled && !_isVerifyError;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -128,12 +188,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Image.asset(
-                            //   'lib/assets/locket_app_icon.png',
-                            //   height: 64,
-                            //   width: 64,
-                            // ),
-                            // const SizedBox(height: 16),
                             const Text(
                               'Nhập mã xác thực',
                               style: TextStyle(
@@ -160,17 +214,15 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                             ),
                             const SizedBox(height: 24),
                             PrimaryAuthButton(
-                              label: 'Xác nhận',
-                              isLoading: _isLoading,
-                              onPressed: _isContinueEnabled ? _submit : null,
+                              label: _verifyButtonLabel,
+                              isLoading: isLoading,
+                              onPressed: canSubmit ? _submit : null,
                             ),
                             const SizedBox(height: 12),
                             TextButton(
-                              onPressed: _isLoading || _isResending
-                                  ? null
-                                  : _resendOtp,
+                              onPressed: canResend ? _resendOtp : null,
                               child: Text(
-                                _isResending ? 'Đang gửi...' : 'Gửi lại mã',
+                                resendText,
                                 style: const TextStyle(
                                   color: AppColors.textSecondary,
                                 ),

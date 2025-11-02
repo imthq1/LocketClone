@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:locket_clone/services/application/auth_controller.dart';
 import 'package:locket_clone/theme/app_colors.dart';
 import 'package:locket_clone/screens/auth/widgets/primary_auth_button.dart';
 import 'package:locket_clone/screens/auth/widgets/primary_auth_input.dart';
+import 'package:provider/provider.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -12,7 +15,8 @@ class ForgotPasswordScreen extends StatefulWidget {
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _emailCtl = TextEditingController();
   bool _isContinueEnabled = false;
-  bool _isLoading = false;
+  Timer? _errorTimer;
+  int _errorCountdown = 0;
 
   @override
   void initState() {
@@ -24,6 +28,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   void dispose() {
     _emailCtl.removeListener(_validateInput);
     _emailCtl.dispose();
+    _errorTimer?.cancel(); // <-- Hủy timer khi tắt màn hình
     super.dispose();
   }
 
@@ -37,27 +42,60 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     }
   }
 
+  void _startErrorCountdown() {
+    _errorTimer?.cancel();
+    setState(() {
+      _errorCountdown = 5;
+    });
+
+    _errorTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_errorCountdown > 0) {
+        setState(() {
+          _errorCountdown--;
+        });
+      } else {
+        timer.cancel();
+        _errorTimer = null;
+      }
+    });
+  }
+
   Future<void> _submit() async {
-    if (!_isContinueEnabled) return;
+    if (!_isContinueEnabled || _errorCountdown > 0) return;
 
-    setState(() => _isLoading = true);
     final email = _emailCtl.text.trim();
+    final auth = context.read<AuthController>();
 
-    // TODO: Triển khai gọi API gửi mã khôi phục đến email
-
-    // Giả lập một cuộc gọi API
-    await Future.delayed(const Duration(seconds: 1));
-    print('Gửi yêu cầu khôi phục cho: $email');
+    final bool success = await auth.sendResetOtp(email);
 
     if (!mounted) return;
-    setState(() => _isLoading = false);
 
-    // Chuyển sang màn hình nhập OTP, truyền email qua arguments
-    Navigator.of(context).pushNamed('/otp-verify', arguments: email);
+    if (success) {
+      Navigator.of(context).pushNamed('/otp-verify', arguments: email);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Bạn phải đợi 60 giây trước khi yêu cầu gửi lại OTP cho email này',
+            style: const TextStyle(color: AppColors.textPrimary),
+          ),
+          backgroundColor: AppColors.error.withValues(alpha: 0.9),
+        ),
+      );
+      _startErrorCountdown();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isLoading = context.watch<AuthController>().isLoading;
+    final bool isButtonDisabled =
+        isLoading || !_isContinueEnabled || _errorCountdown > 0;
+
+    final String buttonLabel = _errorCountdown > 0
+        ? 'Thử lại sau ($_errorCountdown\s)'
+        : 'Tiếp tục';
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -99,14 +137,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             const SizedBox(height: 28),
                             PrimaryAuthInput(
                               controller: _emailCtl,
-                              hintText: 'your-mail@gmail.com',
+                              hintText: 'Nhập email của bạn',
                               keyboardType: TextInputType.emailAddress,
                             ),
                             const SizedBox(height: 24),
                             PrimaryAuthButton(
-                              label: 'Tiếp tục →',
-                              isLoading: _isLoading,
-                              onPressed: _isContinueEnabled ? _submit : null,
+                              label: buttonLabel,
+                              isLoading: isLoading,
+                              onPressed: isButtonDisabled ? null : _submit,
                             ),
                           ],
                         ),

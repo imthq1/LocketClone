@@ -59,8 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthController>();
     final user = auth.user;
-    final sumUser = user?.friend?.sumUser;
-    print('sumUser: ${user}');
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -76,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             Align(
               alignment: Alignment.topCenter,
-              child: HomeTopBar(sumUser: sumUser),
+              child: HomeTopBar(sumUser: user?.friend?.sumUser ?? 0),
             ),
           ],
         ),
