@@ -1,0 +1,217 @@
+package SocialNetwork.SocialNetwork.controller;
+
+import SocialNetwork.SocialNetwork.domain.FriendRequest;
+import SocialNetwork.SocialNetwork.domain.Request.ReqDTO;
+import SocialNetwork.SocialNetwork.domain.Request.ResLoginDTO;
+import SocialNetwork.SocialNetwork.domain.Request.UserResetPass;
+import SocialNetwork.SocialNetwork.domain.Response.UserDTO;
+import SocialNetwork.SocialNetwork.domain.User;
+import SocialNetwork.SocialNetwork.service.FriendService;
+import SocialNetwork.SocialNetwork.service.SessionService;
+import SocialNetwork.SocialNetwork.service.UserService;
+import SocialNetwork.SocialNetwork.util.ApiMessage;
+import SocialNetwork.SocialNetwork.util.RequestUtil;
+import SocialNetwork.SocialNetwork.util.SecurityUtil;
+import SocialNetwork.SocialNetwork.util.error.IdInValidException;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.Duration;
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/api/v1")
+public class AuthController {
+    private final UserService userService;
+    private final FriendService friendService;
+    private final SecurityUtil securityUtil;
+    private final SessionService sessionService;
+    private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private static final String RT_COOKIE = "refresh_token";
+    private static final String RT_PATH   = "/api/auth";
+    private final PasswordEncoder passwordEncoder;
+    @Value("${imthang.jwt.refresh-token-validity-in-seconds:90000}")
+    private long refreshTokenExpiration;
+    public AuthController(UserService userService, AuthenticationManagerBuilder authenticationManagerBuilder,
+                          SecurityUtil securityUtil, SessionService sessionService, FriendService friendService,
+                          PasswordEncoder passwordEncoder) {
+        this.userService = userService;
+        this.authenticationManagerBuilder = authenticationManagerBuilder;
+        this.securityUtil = securityUtil;
+        this.sessionService = sessionService;
+        this.friendService = friendService;
+        this.passwordEncoder = passwordEncoder;
+    }
+    @PostMapping("/auth/register")
+    @ApiMessage("Register Account")
+    public ResponseEntity<UserDTO> register(@RequestBody User user) throws IdInValidException {
+        if(this.userService.getUserByEmail(user.getEmail())!=null){
+            throw new IdInValidException("User has been exists!");
+        }
+        UserDTO userDTO=this.userService.CreateUser(user);
+//        this.emailService.sendLinkVerify(user.getEmail(), user.getFullname());
+        return ResponseEntity.ok().body(userDTO);
+    }
+    @GetMapping("/auth/account")
+    @ApiMessage("get Account")
+    public ResponseEntity<UserDTO> getAccount() throws IdInValidException {
+        Optional<String> emailOpt = SecurityUtil.getCurrentUserLogin();
+        if (emailOpt.isEmpty()) {
+            throw new IdInValidException("User not logged in");
+        }
+        String email = emailOpt.get();
+        List<User> friendRequests=this.userService.findAcceptedByRequesterEmail(email);
+        User currentUserDB = userService.getUserByEmail(email);
+        if (currentUserDB == null) {
+            throw new IdInValidException("User not found");
+        }
+
+        UserDTO.Friend friendDTO = new UserDTO.Friend();
+
+        // Map sang DTO cho bạn bè
+        List<UserDTO> friendDtos = friendRequests.stream().map(u -> {
+            UserDTO dto = new UserDTO();
+            dto.setId(u.getId());
+            dto.setEmail(u.getEmail());
+            dto.setFullname(u.getFullname());
+            dto.setAddress(u.getAddress());
+            dto.setImage(u.getImageUrl());
+            return dto;
+        }).toList();
+        friendDTO.setFriends(friendDtos);
+        friendDTO.setSumUser(friendRequests.size());
+
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(currentUserDB.getId());
+        userDTO.setEmail(currentUserDB.getEmail());
+        userDTO.setFullname(currentUserDB.getFullname());
+        userDTO.setAddress(currentUserDB.getAddress());
+        userDTO.setImage(currentUserDB.getImageUrl());
+        userDTO.setFriend(friendDTO);
+
+        return ResponseEntity.ok(userDTO);
+    }
+    @PutMapping("/auth/resetPw")
+    public ResponseEntity<?> resetPass(@RequestBody UserResetPass userDTO)
+        throws IdInValidException {
+        User user=this.userService.getUserByEmail(userDTO.getEmail());
+        String hashPass=passwordEncoder.encode(userDTO.getPassword());
+        user.setPassword(hashPass);
+        this.userService.save(user);
+        return ResponseEntity.ok("Password reset successful");
+    }
+    @PostMapping("/auth/login")
+    @ApiMessage("Login Account")
+    public ResponseEntity<ResLoginDTO> login(@RequestBody ReqDTO req,
+                                             HttpServletRequest request) throws IdInValidException {
+
+        User user = userService.getUserByEmail(req.getEmail());
+        if (user == null) throw new IdInValidException("User hasn't exists!");
+
+        var authenticationToken = new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword());
+        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        var res = new ResLoginDTO();
+        res.setUserLogin(new ResLoginDTO.UserLogin(user.getId(), user.getEmail(), user.getFullname()));
+
+        String accessToken = securityUtil.createAcessToken(authentication.getName(), res);
+        res.setAccessToken(accessToken);
+
+        String refreshToken = securityUtil.createRefreshToken(user.getEmail(), res);
+
+        String ip = RequestUtil.clientIp(request);
+        String ua = RequestUtil.userAgent(request);
+        sessionService.createSession(user, refreshToken, ua, ip, refreshTokenExpiration);
+
+        ResponseCookie rtCookie = ResponseCookie.from(RT_COOKIE, refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path(RT_PATH)
+                .maxAge(Duration.ofSeconds(refreshTokenExpiration))
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, rtCookie.toString())
+                .body(res);
+    }
+    @PutMapping("/auth/reName")
+    public ResponseEntity<?> reName(@RequestParam String newName){
+        User user=this.userService.findByEmail(SecurityUtil.getCurrentUserLogin().get());
+        user.setFullname(newName);
+        this.userService.save(user);
+        return ResponseEntity.ok("Fullname updated successfully");
+    }
+    @PutMapping("/auth/Avt")
+    public ResponseEntity<?> reAvt(@RequestParam String Avt)
+    {
+        User user=this.userService.findByEmail(SecurityUtil.getCurrentUserLogin().get());
+        user.setImageUrl(Avt);
+        this.userService.save(user);
+        return ResponseEntity.ok("Image updated successfully");
+    }
+    @PostMapping("/auth/refresh")
+    public ResponseEntity<ResLoginDTO> refresh(@CookieValue(name = RT_COOKIE, required = false) String rtCookieVal)
+            throws IdInValidException {
+
+        if (rtCookieVal == null || rtCookieVal.isBlank()) {
+            throw new IdInValidException("Missing refresh token");
+        }
+
+        var jwt = securityUtil.checkValidRefreshToken(rtCookieVal);
+        var session = sessionService
+                .findByRefreshToken(rtCookieVal)
+                .orElseThrow(() -> new IdInValidException("Refresh session not found"));
+        if (session.getExpiresAt().isBefore(java.time.Instant.now())) {
+            sessionService.revokeByRefreshToken(rtCookieVal);
+            throw new IdInValidException("Refresh token expired");
+        }
+
+        var res = new ResLoginDTO();
+        res.setUserLogin(new ResLoginDTO.UserLogin(session.getUser().getId(),
+                jwt.getSubject(), session.getUser().getFullname()));
+
+        String newAccess = securityUtil.createAcessToken(jwt.getSubject(), res);
+        res.setAccessToken(newAccess);
+
+        String newRefresh = securityUtil.createRefreshToken(jwt.getSubject(), res);
+        sessionService.rotateRefreshToken(session, newRefresh, refreshTokenExpiration);
+
+        ResponseCookie rtCookie = ResponseCookie.from(RT_COOKIE, newRefresh)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path(RT_PATH)
+                .maxAge(Duration.ofSeconds(refreshTokenExpiration))
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, rtCookie.toString())
+                .body(res);
+    }
+
+    @PostMapping("/auth/logout")
+    public ResponseEntity<Void> logout(@CookieValue(name = RT_COOKIE, required = false) String rtCookieVal) {
+        if (rtCookieVal != null && !rtCookieVal.isBlank()) {
+            sessionService.revokeByRefreshToken(rtCookieVal);
+        }
+        ResponseCookie del = ResponseCookie.from(RT_COOKIE, "")
+                .httpOnly(true).secure(true).sameSite("None")
+                .path(RT_PATH).maxAge(0)
+                .build();
+        return ResponseEntity.noContent()
+                .header(HttpHeaders.SET_COOKIE, del.toString())
+                .build();
+    }
+}
