@@ -1,0 +1,99 @@
+# =========================
+# Spring Boot backend (.env)
+# =========================
+
+# Hệ điều hành
+.DS_Store
+Thumbs.db
+
+# IDE/Editor
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+.sts4-cache/
+*.factorypath
+
+# Log & tạm
+logs/
+*.log
+spring.log
+tmp/
+.cache/
+*.tmp
+*.bak
+*.orig
+hs_err_pid*
+replay_pid*
+heapdump.hprof
+
+# --------------- 
+# ENV (bí mật)
+# ---------------
+# Bỏ qua mọi file .env (kể cả trong module con), giữ lại file mẫu để chia sẻ
+**/.env
+**/.env.*
+!**/.env.example
+
+# Database tạm (ví dụ H2)
+*.h2.db
+*.mv.db
+*.db
+
+# ---------------
+# Java build
+# ---------------
+*.class
+# Bỏ qua JAR/WAR/EAR tạo ra khi build, nhưng giữ wrapper
+*.jar
+*.war
+*.ear
+!gradle/wrapper/gradle-wrapper.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# ---------------
+# Maven
+# ---------------
+target/
+**/target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+.mvn/timing.properties
+
+# ---------------
+# Gradle
+# ---------------
+.gradle/
+build/
+**/build/
+out/
+**/out/
+# Giữ các file wrapper để team nào cũng build được
+!gradlew
+!gradlew.bat
+!gradle/wrapper/gradle-wrapper.jar
+
+# ---------------
+# Kiểm thử & báo cáo
+# ---------------
+surefire-reports/
+failsafe-reports/
+test-results/
+reports/
+coverage/
+jacoco.exec
+
+# ---------------
+# Cấu hình local (tùy chọn)
+# ---------------
+# Nếu bạn có file cấu hình local riêng, có thể bỏ qua:
+# application-local.properties
+# application-local.yml
