@@ -3,10 +3,13 @@ import 'package:locket_clone/services/data/models/res_login_dto.dart';
 import 'package:locket_clone/services/websocket/websocket_service.dart';
 import '../repository/auth_repository.dart';
 import '../data/models/user_dto.dart';
+import 'chat_cache_service.dart';
 
 class AuthController extends ChangeNotifier {
   final AuthRepository _repo;
-  AuthController(this._repo);
+  final ChatCacheService _chatCache;
+
+  AuthController(this._repo, this._chatCache);
 
   UserDTO? _user;
   ResLoginDTO? _loginDTO;
@@ -139,8 +142,9 @@ class AuthController extends ChangeNotifier {
     _setLoading(true);
     try {
       await _repo.logout();
-      _setUser(null);
+      _chatCache.clearAll();
       WebSocketService.I.disconnect();
+      _setUser(null);
     } catch (e) {
       _setError(e.toString());
       _setUser(null);

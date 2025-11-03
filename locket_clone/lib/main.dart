@@ -48,11 +48,6 @@ class LocketClone extends StatelessWidget {
     final storage = SecureStorage();
     final dio = await DioClient.create(storage);
 
-    // Auth
-    final authApi = AuthApi(dio);
-    final authRepo = AuthRepositoryImpl(authApi, storage);
-    final authCtrl = AuthController(authRepo);
-
     // Post
     final postApi = PostApi(dio);
     final postRepo = PostRepositoryImpl(postApi);
@@ -67,6 +62,11 @@ class LocketClone extends StatelessWidget {
     final chatApi = ChatApi(dio);
     final chatRepo = ChatRepositoryImpl(chatApi);
     final chatCache = ChatCacheService(chatRepo);
+
+    // Auth
+    final authApi = AuthApi(dio);
+    final authRepo = AuthRepositoryImpl(authApi, storage);
+    final authCtrl = AuthController(authRepo, chatCache);
 
     return (
       auth: authCtrl,

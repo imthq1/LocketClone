@@ -59,6 +59,8 @@ class FriendPostActions extends StatelessWidget {
     final repo = context.read<ChatRepository>();
     final auth = context.read<AuthController>();
     final meId = auth.user?.id;
+    final authorFullname = post.authorFullname;
+
     if (meId == null) {
       _toast(context, 'Bạn cần đăng nhập.');
       return;
@@ -78,7 +80,7 @@ class FriendPostActions extends StatelessWidget {
         content: content,
         image: post.image,
       );
-      _toast(context, 'Đã gửi 👌');
+      _toast(context, 'Đã gửi đến $authorFullname');
     } catch (e) {
       _toast(context, 'Gửi thất bại: $e');
     }
