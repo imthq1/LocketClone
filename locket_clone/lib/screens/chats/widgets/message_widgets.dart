@@ -3,16 +3,12 @@ import 'package:locket_clone/screens/chats/chat_screen.dart';
 import 'package:locket_clone/services/data/models/chat_dto.dart';
 import 'package:locket_clone/services/data/models/user_dto.dart';
 import 'package:locket_clone/theme/app_colors.dart';
+import 'package:locket_clone/shared/cloudinary_helper.dart';
+import 'package:locket_clone/screens/friends/utils/initials.dart';
 
 class ChatRow extends StatelessWidget {
   final UserDTO user;
   const ChatRow({super.key, required this.user});
-
-  String _initialOf(String s) {
-    final t = (s).trim();
-    if (t.isEmpty) return 'U';
-    return String.fromCharCodes(t.runes.take(1));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,11 +50,11 @@ class ChatRow extends StatelessWidget {
         child: CircleAvatar(
           backgroundColor: AppColors.fieldBackground,
           backgroundImage: avatarUrl.isNotEmpty
-              ? NetworkImage(avatarUrl)
+              ? NetworkImage(buildCloudinaryUrl(avatarUrl))
               : null,
           child: avatarUrl.isEmpty
               ? Text(
-                  _initialOf(name),
+                  initialsFrom(name),
                   style: const TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 18,

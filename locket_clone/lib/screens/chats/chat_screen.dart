@@ -1,18 +1,13 @@
-// lib/screens/chats/chat_screen.dart
 import 'package:flutter/material.dart';
 import 'package:locket_clone/shared/cloudinary_helper.dart';
 import 'package:provider/provider.dart';
-
 import 'package:locket_clone/services/application/auth_controller.dart';
 import 'package:locket_clone/services/application/chat_controller.dart';
 import 'package:locket_clone/services/data/models/chat_dto.dart';
 import 'package:locket_clone/services/repository/chat_repository.dart';
 import 'package:locket_clone/services/websocket/websocket_service.dart';
-
-// Import file widgets vừa tạo
 import 'widgets/chat_widgets.dart';
 
-/// 1. Widget này là StatelessWidget, chịu trách nhiệm cung cấp Controller
 class ChatScreen extends StatelessWidget {
   final String emailRq;
   final ChatUserDTO? partnerPrefill;
@@ -21,21 +16,15 @@ class ChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 2. Cung cấp ChatController cục bộ
     return ChangeNotifierProvider(
-      create: (ctx) => ChatController(
-        ctx.read<ChatRepository>(), // Lấy repo từ provider toàn cục
-        WebSocketService.I, // Lấy service singleton
-      )..loadConversationByEmail(emailRq), // Load data ngay khi tạo
-      child: _ChatScreenView(
-        // 3. Build UI con
-        partnerPrefill: partnerPrefill,
-      ),
+      create: (ctx) =>
+          ChatController(ctx.read<ChatRepository>(), WebSocketService.I)
+            ..loadConversationByEmail(emailRq),
+      child: _ChatScreenView(partnerPrefill: partnerPrefill),
     );
   }
 }
 
-/// 4. Widget này là StatefullWidget, chịu trách nhiệm quản lý UI
 class _ChatScreenView extends StatefulWidget {
   final ChatUserDTO? partnerPrefill;
   const _ChatScreenView({this.partnerPrefill});
@@ -57,7 +46,6 @@ class _ChatScreenViewState extends State<_ChatScreenView> {
 
   void _scrollToBottom() {
     if (!_scrollCtrl.hasClients) return;
-    // Đợi 1 chút để ListView build xong
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_scrollCtrl.hasClients) {
         _scrollCtrl.animateTo(
@@ -185,9 +173,8 @@ class _ChatScreenViewState extends State<_ChatScreenView> {
         children: [
           Expanded(
             child: (isLoading && conv == null)
-                ? const Loading() // Từ file widgets
+                ? const Loading()
                 : MessageList(
-                    // Từ file widgets
                     controller: _scrollCtrl,
                     messages: conv?.messages ?? const [],
                     meId: meId,

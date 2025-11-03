@@ -1,9 +1,7 @@
-// lib/screens/chats/widgets/chat_widgets.dart
 import 'package:flutter/material.dart';
 import 'package:locket_clone/services/data/models/chat_dto.dart';
 import 'package:locket_clone/shared/cloudinary_helper.dart';
 
-/// Hiển thị danh sách tin nhắn
 class MessageList extends StatelessWidget {
   final ScrollController controller;
   final List<MessageDTO> messages;
@@ -20,7 +18,6 @@ class MessageList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Sắp xếp tin nhắn theo thời gian
     final sorted = [...messages]
       ..sort((a, b) {
         final ta = a.createdAt?.millisecondsSinceEpoch ?? 0;
@@ -28,7 +25,6 @@ class MessageList extends StatelessWidget {
         return ta.compareTo(tb);
       });
 
-    // Gọi callback (ví dụ: để cuộn xuống) sau khi list-view được build
     WidgetsBinding.instance.addPostFrameCallback((_) => onBuilt());
 
     return ListView.builder(
@@ -46,7 +42,6 @@ class MessageList extends StatelessWidget {
   }
 }
 
-/// Widget bong bóng chat cho 1 tin nhắn
 class Bubble extends StatelessWidget {
   final MessageDTO message;
   final bool isMe;
@@ -144,7 +139,6 @@ class Bubble extends StatelessWidget {
   }
 }
 
-/// Widget loading
 class Loading extends StatelessWidget {
   const Loading({super.key});
   @override
@@ -153,7 +147,6 @@ class Loading extends StatelessWidget {
   }
 }
 
-/// Helper định dạng giờ:phút
 String fmtTime(DateTime? dt) {
   if (dt == null) return '';
   final h = dt.hour.toString().padLeft(2, '0');
@@ -161,7 +154,6 @@ String fmtTime(DateTime? dt) {
   return '$h:$m';
 }
 
-/// Helper lấy ký tự đầu
 String initialOf(String s) {
   final t = s.trim();
   if (t.isEmpty) return 'U';
