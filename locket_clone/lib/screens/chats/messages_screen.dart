@@ -25,9 +25,9 @@ class MessagesScreen extends StatelessWidget {
         ),
         centerTitle: true,
         title: const Text(
-          'Messages',
+          'Tin nhắn',
           style: TextStyle(
-            color: AppColors.textSecondary,
+            color: AppColors.textPrimary,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -39,7 +39,7 @@ class MessagesScreen extends StatelessWidget {
         child: Builder(
           builder: (_) {
             if (ctrl.isLoading && ctrl.friends.isEmpty) {
-              return const LoadingList(); // Dùng Widget
+              return const LoadingList();
             }
             if (ctrl.error != null && ctrl.friends.isEmpty) {
               return ListView(

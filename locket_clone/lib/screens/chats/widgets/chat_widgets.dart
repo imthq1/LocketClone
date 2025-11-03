@@ -153,9 +153,3 @@ String fmtTime(DateTime? dt) {
   final m = dt.minute.toString().padLeft(2, '0');
   return '$h:$m';
 }
-
-String initialOf(String s) {
-  final t = s.trim();
-  if (t.isEmpty) return 'U';
-  return String.fromCharCodes(t.runes.take(1));
-}

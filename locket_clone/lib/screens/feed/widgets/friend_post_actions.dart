@@ -55,7 +55,6 @@ class FriendPostActions extends StatelessWidget {
     );
   }
 
-  // THAY ĐỔI 3: Cập nhật logic hàm _sendQuick
   Future<void> _sendQuick(BuildContext context, String content) async {
     final repo = context.read<ChatRepository>();
     final auth = context.read<AuthController>();
@@ -65,7 +64,6 @@ class FriendPostActions extends StatelessWidget {
       return;
     }
 
-    // Kiểm tra email tác giả bài post
     final authorEmail = post.authorEmail;
     if (authorEmail == null || authorEmail.isEmpty) {
       _toast(context, 'Không tìm thấy thông tin tác giả.');
@@ -73,9 +71,7 @@ class FriendPostActions extends StatelessWidget {
     }
 
     try {
-      // 1. Lấy (hoặc tạo) hội thoại qua REST
       final conv = await repo.getOrCreateConversation(authorEmail);
-      // 2. Gửi tin nhắn qua REST
       await repo.sendMessage(
         conversationId: conv.id,
         senderId: meId,
@@ -88,7 +84,6 @@ class FriendPostActions extends StatelessWidget {
     }
   }
 
-  // THAY ĐỔI 4: Cập nhật logic hàm _openComposer
   Future<void> _openComposer(BuildContext context) async {
     final textCtrl = TextEditingController();
     final imageUrl = buildCloudinaryUrl(post.image);
@@ -172,6 +167,8 @@ class FriendPostActions extends StatelessWidget {
     final repo = context.read<ChatRepository>();
     final auth = context.read<AuthController>();
     final meId = auth.user?.id;
+    final authorFullname = post.authorFullname;
+
     if (meId == null) {
       _toast(context, 'Bạn cần đăng nhập.');
       return;
@@ -191,7 +188,7 @@ class FriendPostActions extends StatelessWidget {
         content: content,
         image: post.image,
       );
-      _toast(context, 'Đã gửi 👌');
+      _toast(context, 'Đã gửi đến $authorFullname');
     } catch (e) {
       _toast(context, 'Gửi thất bại: $e');
     }

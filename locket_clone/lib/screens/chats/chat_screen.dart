@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:locket_clone/screens/friends/utils/initials.dart';
 import 'package:locket_clone/shared/cloudinary_helper.dart';
+import 'package:locket_clone/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:locket_clone/services/application/auth_controller.dart';
 import 'package:locket_clone/services/application/chat_controller.dart';
@@ -108,9 +110,9 @@ class _ChatScreenViewState extends State<_ChatScreenView> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _sendReadIfNeeded());
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: AppColors.background,
         elevation: 0,
         titleSpacing: 0,
         title: Row(
@@ -125,8 +127,8 @@ class _ChatScreenViewState extends State<_ChatScreenView> {
               child: (partner?.imageUrl?.isNotEmpty ?? false)
                   ? null
                   : Text(
-                      initialOf(partner?.fullname ?? partner?.email ?? 'U'),
-                      style: const TextStyle(color: Colors.white),
+                      initialsFrom(partner?.fullname ?? "User"),
+                      style: const TextStyle(color: AppColors.textPrimary),
                     ),
             ),
             const SizedBox(width: 12),
@@ -141,7 +143,7 @@ class _ChatScreenViewState extends State<_ChatScreenView> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -149,7 +151,10 @@ class _ChatScreenViewState extends State<_ChatScreenView> {
                     const SizedBox(height: 2),
                     const Text(
                       'Đang nhập…',
-                      style: TextStyle(color: Colors.white54, fontSize: 12),
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ],
@@ -193,12 +198,14 @@ class _ChatScreenViewState extends State<_ChatScreenView> {
                   Expanded(
                     child: TextField(
                       controller: _textCtrl,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: AppColors.textPrimary),
                       minLines: 1,
                       maxLines: 4,
                       decoration: InputDecoration(
                         hintText: 'Nhắn tin…',
-                        hintStyle: const TextStyle(color: Colors.white38),
+                        hintStyle: const TextStyle(
+                          color: AppColors.textSecondary,
+                        ),
                         filled: true,
                         fillColor: const Color(0xFF161616),
                         contentPadding: const EdgeInsets.symmetric(
@@ -232,7 +239,10 @@ class _ChatScreenViewState extends State<_ChatScreenView> {
                   const SizedBox(width: 8),
                   IconButton(
                     onPressed: _send,
-                    icon: const Icon(Icons.send_rounded, color: Colors.white),
+                    icon: const Icon(
+                      Icons.send_rounded,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ],
               ),
