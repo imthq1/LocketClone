@@ -14,6 +14,7 @@ class ChatController extends ChangeNotifier {
   ConversationDTO? conversation;
   String? _error;
   String? get error => _error;
+  String draft = '';
 
   StompUnsubscribe? _convSub;
   StompUnsubscribe? _typingSub;

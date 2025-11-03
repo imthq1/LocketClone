@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:locket_clone/services/application/auth_controller.dart';
 import 'package:locket_clone/services/application/chat_controller.dart';
 import 'package:locket_clone/services/data/models/chat_dto.dart';
-import 'package:locket_clone/services/repository/chat_repository.dart';
+import 'package:locket_clone/services/application/chat_cache_service.dart';
 import 'package:locket_clone/services/websocket/websocket_service.dart';
 import 'widgets/chat_widgets.dart';
 
@@ -18,10 +18,11 @@ class ChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (ctx) =>
-          ChatController(ctx.read<ChatRepository>(), WebSocketService.I)
-            ..loadConversationByEmail(emailRq),
+    final chatCache = context.read<ChatCacheService>();
+    final controller = chatCache.getController(emailRq);
+
+    return ChangeNotifierProvider.value(
+      value: controller,
       child: _ChatScreenView(partnerPrefill: partnerPrefill),
     );
   }
@@ -38,6 +39,13 @@ class _ChatScreenView extends StatefulWidget {
 class _ChatScreenViewState extends State<_ChatScreenView> {
   final _textCtrl = TextEditingController();
   final _scrollCtrl = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    final draft = context.read<ChatController>().draft;
+    _textCtrl.text = draft;
+  }
 
   @override
   void dispose() {
@@ -71,10 +79,13 @@ class _ChatScreenViewState extends State<_ChatScreenView> {
     chat.sendMessage(senderId: meId, content: text);
 
     _textCtrl.clear();
+    chat.draft = '';
     _scrollToBottom();
   }
 
   void _onChangedText(String v) {
+    final chat = context.read<ChatController>();
+    chat.draft = v;
     context.read<ChatController>().notifyTyping(v.isNotEmpty);
   }
 

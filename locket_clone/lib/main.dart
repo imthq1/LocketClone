@@ -25,6 +25,7 @@ import 'screens/auth/register_screen.dart';
 import 'screens/auth/forgot_password_screen.dart';
 import 'package:locket_clone/screens/auth/otp_verification_screen.dart';
 import 'package:locket_clone/screens/auth/create_password_screen.dart';
+import 'package:locket_clone/services/application/chat_cache_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +41,7 @@ class LocketClone extends StatelessWidget {
       PostController post,
       FriendsController friend,
       ChatRepository chatRepo,
+      ChatCacheService chatCache,
     })
   >
   _initControllers() async {
@@ -64,12 +66,14 @@ class LocketClone extends StatelessWidget {
     // Chat
     final chatApi = ChatApi(dio);
     final chatRepo = ChatRepositoryImpl(chatApi);
+    final chatCache = ChatCacheService(chatRepo);
 
     return (
       auth: authCtrl,
       post: postCtrl,
       friend: friendCtrl,
       chatRepo: chatRepo,
+      chatCache: chatCache,
     );
   }
 
@@ -81,6 +85,7 @@ class LocketClone extends StatelessWidget {
         PostController post,
         FriendsController friend,
         ChatRepository chatRepo,
+        ChatCacheService chatCache,
       })
     >(
       future: _initControllers(),
@@ -106,6 +111,9 @@ class LocketClone extends StatelessWidget {
               value: WebSocketService.I,
             ),
             Provider<ChatRepository>(create: (_) => chatRepo),
+            ChangeNotifierProvider<ChatCacheService>.value(
+              value: ctrls.chatCache,
+            ),
           ],
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
