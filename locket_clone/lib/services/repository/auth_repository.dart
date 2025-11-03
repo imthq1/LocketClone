@@ -16,6 +16,7 @@ abstract class AuthRepository {
   Future<void> logout();
   Future<ResLoginDTO> refresh();
   Future<bool> hasAccessToken();
+  Future<String?> getSavedAccessToken();
   Future<void> sendResetOtp(String email);
   Future<void> verifyResetOtp(String email, String otp);
   Future<void> resetPassword(String email, String newPassword);
@@ -80,6 +81,11 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<bool> hasAccessToken() async {
     final at = await _storage.readAccessToken();
     return at != null && at.isNotEmpty;
+  }
+
+  @override
+  Future<String?> getSavedAccessToken() {
+    return _storage.readAccessToken();
   }
 
   @override

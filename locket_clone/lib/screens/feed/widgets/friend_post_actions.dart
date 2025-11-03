@@ -5,7 +5,7 @@ import 'package:locket_clone/services/data/models/post_dto.dart';
 import 'package:locket_clone/shared/cloudinary_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:locket_clone/services/application/auth_controller.dart';
-import 'package:locket_clone/services/application/chat_controller.dart';
+import 'package:locket_clone/services/repository/chat_repository.dart';
 import 'package:locket_clone/theme/app_colors.dart';
 
 class FriendPostActions extends StatelessWidget {
@@ -55,8 +55,9 @@ class FriendPostActions extends StatelessWidget {
     );
   }
 
+  // THAY ĐỔI 3: Cập nhật logic hàm _sendQuick
   Future<void> _sendQuick(BuildContext context, String content) async {
-    final chat = context.read<ChatController>();
+    final repo = context.read<ChatRepository>();
     final auth = context.read<AuthController>();
     final meId = auth.user?.id;
     if (meId == null) {
@@ -64,10 +65,19 @@ class FriendPostActions extends StatelessWidget {
       return;
     }
 
+    // Kiểm tra email tác giả bài post
+    final authorEmail = post.authorEmail;
+    if (authorEmail == null || authorEmail.isEmpty) {
+      _toast(context, 'Không tìm thấy thông tin tác giả.');
+      return;
+    }
+
     try {
-      // đảm bảo có conversation 1-1 với chủ bài post
-      await chat.loadConversationByEmail(post.authorEmail!);
-      await chat.sendMessage(
+      // 1. Lấy (hoặc tạo) hội thoại qua REST
+      final conv = await repo.getOrCreateConversation(authorEmail);
+      // 2. Gửi tin nhắn qua REST
+      await repo.sendMessage(
+        conversationId: conv.id,
         senderId: meId,
         content: content,
         image: post.image,
@@ -78,6 +88,7 @@ class FriendPostActions extends StatelessWidget {
     }
   }
 
+  // THAY ĐỔI 4: Cập nhật logic hàm _openComposer
   Future<void> _openComposer(BuildContext context) async {
     final textCtrl = TextEditingController();
     final imageUrl = buildCloudinaryUrl(post.image);
@@ -110,6 +121,7 @@ class FriendPostActions extends StatelessWidget {
                 style: const TextStyle(color: Colors.white),
                 maxLines: 4,
                 minLines: 1,
+                autofocus: true,
                 decoration: InputDecoration(
                   hintText: 'Viết gì đó kèm ảnh này…',
                   hintStyle: const TextStyle(color: Colors.white54),
@@ -157,7 +169,7 @@ class FriendPostActions extends StatelessWidget {
     final content = res?.trim() ?? '';
     if (content.isEmpty) return;
 
-    final chat = context.read<ChatController>();
+    final repo = context.read<ChatRepository>();
     final auth = context.read<AuthController>();
     final meId = auth.user?.id;
     if (meId == null) {
@@ -165,9 +177,16 @@ class FriendPostActions extends StatelessWidget {
       return;
     }
 
+    final authorEmail = post.authorEmail;
+    if (authorEmail == null || authorEmail.isEmpty) {
+      _toast(context, 'Không tìm thấy thông tin tác giả.');
+      return;
+    }
+
     try {
-      await chat.loadConversationByEmail(post.authorEmail!);
-      await chat.sendMessage(
+      final conv = await repo.getOrCreateConversation(authorEmail);
+      await repo.sendMessage(
+        conversationId: conv.id,
         senderId: meId,
         content: content,
         image: post.image,

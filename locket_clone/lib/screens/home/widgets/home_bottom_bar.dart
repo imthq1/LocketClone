@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:locket_clone/screens/home/history_row.dart';
+import 'package:locket_clone/screens/home/widgets/history_row.dart';
 
 class HomeBottomBar extends StatelessWidget {
   final VoidCallback? onHistoryPressed;

@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:locket_clone/services/data/models/res_login_dto.dart';
+import 'package:locket_clone/services/websocket/websocket_service.dart';
 import '../repository/auth_repository.dart';
 import '../data/models/user_dto.dart';
 
 class AuthController extends ChangeNotifier {
   final AuthRepository _repo;
-
   AuthController(this._repo);
 
   UserDTO? _user;
@@ -17,6 +17,10 @@ class AuthController extends ChangeNotifier {
   ResLoginDTO? get loginDTO => _loginDTO;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  String _getWsUrl() {
+    return 'ws://10.0.2.2:8080/ws/websocket';
+  }
 
   void _setLoading(bool v) {
     _isLoading = v;
@@ -54,6 +58,8 @@ class AuthController extends ChangeNotifier {
         ),
       );
 
+      WebSocketService.I.connect(url: _getWsUrl(), jwt: loginRes.accessToken);
+
       await loadCurrentUser();
     } catch (e) {
       _setError(e.toString());
@@ -90,6 +96,8 @@ class AuthController extends ChangeNotifier {
           fullname: userInfo.fullname,
         ),
       );
+
+      WebSocketService.I.connect(url: _getWsUrl(), jwt: u.accessToken);
     } catch (e) {
       _setError(e.toString());
       _setUser(null);
@@ -103,15 +111,24 @@ class AuthController extends ChangeNotifier {
     _setLoading(true);
     try {
       final hasAT = await _repo.hasAccessToken();
+
       if (!hasAT) {
         _setUser(null);
+        WebSocketService.I.disconnect();
       } else {
         final u = await _repo.getCurrentUser();
         _setUser(u);
+        final token = await _repo.getSavedAccessToken();
+        if (token != null && token.isNotEmpty) {
+          WebSocketService.I.connect(url: _getWsUrl(), jwt: token);
+        } else {
+          WebSocketService.I.disconnect();
+        }
       }
     } catch (e) {
       _setUser(null);
       _setError(e.toString());
+      WebSocketService.I.disconnect();
     } finally {
       _setLoading(false);
     }
@@ -123,6 +140,7 @@ class AuthController extends ChangeNotifier {
     try {
       await _repo.logout();
       _setUser(null);
+      WebSocketService.I.disconnect();
     } catch (e) {
       _setError(e.toString());
       _setUser(null);

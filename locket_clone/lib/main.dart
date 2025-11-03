@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:locket_clone/screens/friends/friends_screen.dart';
-import 'package:locket_clone/screens/home/messages_screen.dart';
+import 'package:locket_clone/screens/chats/messages_screen.dart';
 import 'package:locket_clone/screens/profile/profile_screen.dart';
-import 'package:locket_clone/services/application/chat_controller.dart';
 import 'package:locket_clone/services/application/friends_controller.dart';
 import 'package:locket_clone/services/data/datasources/chat_api.dart';
 import 'package:locket_clone/services/data/datasources/friend_api.dart';
 import 'package:locket_clone/services/repository/chat_repository.dart';
 import 'package:locket_clone/services/repository/friend_repository.dart';
 import 'package:locket_clone/services/repository/post_repository.dart';
+import 'package:locket_clone/services/websocket/websocket_service.dart';
 import 'package:provider/provider.dart';
 
 import 'core/storage/secure_storage.dart';
@@ -39,7 +39,7 @@ class LocketClone extends StatelessWidget {
       AuthController auth,
       PostController post,
       FriendsController friend,
-      ChatController chat,
+      ChatRepository chatRepo,
     })
   >
   _initControllers() async {
@@ -56,16 +56,21 @@ class LocketClone extends StatelessWidget {
     final postRepo = PostRepositoryImpl(postApi);
     final postCtrl = PostController(postRepo);
 
-    //friend
+    // Friend
     final friendApi = FriendApi(dio);
     final friendRepo = FriendRepositoryImpl(friendApi);
     final friendCtrl = FriendsController(friendRepo);
 
+    // Chat
     final chatApi = ChatApi(dio);
     final chatRepo = ChatRepositoryImpl(chatApi);
-    final chatCtrl = ChatController(chatRepo);
 
-    return (auth: authCtrl, post: postCtrl, friend: friendCtrl, chat: chatCtrl);
+    return (
+      auth: authCtrl,
+      post: postCtrl,
+      friend: friendCtrl,
+      chatRepo: chatRepo,
+    );
   }
 
   @override
@@ -75,7 +80,7 @@ class LocketClone extends StatelessWidget {
         AuthController auth,
         PostController post,
         FriendsController friend,
-        ChatController chat,
+        ChatRepository chatRepo,
       })
     >(
       future: _initControllers(),
@@ -88,6 +93,8 @@ class LocketClone extends StatelessWidget {
         }
 
         final ctrls = snapshot.data!;
+        final chatRepo = ctrls.chatRepo;
+
         return MultiProvider(
           providers: [
             ChangeNotifierProvider<AuthController>.value(value: ctrls.auth),
@@ -95,7 +102,10 @@ class LocketClone extends StatelessWidget {
             ChangeNotifierProvider<FriendsController>.value(
               value: ctrls.friend,
             ),
-            ChangeNotifierProvider<ChatController>.value(value: ctrls.chat),
+            ChangeNotifierProvider<WebSocketService>.value(
+              value: WebSocketService.I,
+            ),
+            Provider<ChatRepository>(create: (_) => chatRepo),
           ],
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
