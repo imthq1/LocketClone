@@ -1,4 +1,3 @@
-// PostDTO.java
 package SocialNetwork.SocialNetwork.domain.Response;
 
 import SocialNetwork.SocialNetwork.domain.Post;
@@ -15,6 +14,7 @@ public class PostDTO {
     private Long authorId;
     private String authorEmail;
     private String authorFullname;
+    private String authorAvatar;
     private String visibility;
 
     public static PostDTO fromEntity(Post p) {
@@ -26,6 +26,7 @@ public class PostDTO {
         dto.setAuthorId(p.getUser().getId());
         dto.setAuthorEmail(p.getUser().getEmail());
         dto.setAuthorFullname(p.getUser().getFullname());
+        dto.setAuthorAvatar((p.getUser().getImageUrl()));
         dto.setVisibility(p.getVisibility().name());
         return dto;
     }

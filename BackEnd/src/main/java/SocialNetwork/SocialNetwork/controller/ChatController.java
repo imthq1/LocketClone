@@ -88,7 +88,7 @@ public class ChatController {
                        @Payload TypingReq req,
                        Principal principal) {
 
-        String currentUserEmail = principal.getName(); // email từ JWT trên WS
+        String currentUserEmail = principal.getName();
         User currentUser = userRepository.findByEmail(currentUserEmail);
 
 
