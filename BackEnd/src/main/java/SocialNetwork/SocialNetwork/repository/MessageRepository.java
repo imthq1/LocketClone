@@ -5,6 +5,8 @@ import org.springframework.data.domain.*;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
     // Lấy message theo conversation (phân trang, cũ → mới)
@@ -34,4 +36,10 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
         AND m.read = false
     """)
     int markAllRead(@Param("cid") Long conversationId, @Param("me") Long me);
+    @Query("""
+        SELECT m FROM Message m
+        WHERE m.conversation.id = :convId
+        ORDER BY m.createdAt DESC, m.id DESC
+    """)
+    List<Message> findLastMessage(@Param("convId") Long convId, Pageable pageable);
 }

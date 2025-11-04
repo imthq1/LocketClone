@@ -1,6 +1,6 @@
 package SocialNetwork.SocialNetwork.domain.Response;
 
-import SocialNetwork.SocialNetwork.domain.MessageSimpleDTO;
+import SocialNetwork.SocialNetwork.domain.Request.MessageSimpleDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

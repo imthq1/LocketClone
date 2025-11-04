@@ -37,4 +37,15 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
     Long findPeerId(@Param("conversationId") Long conversationId,
                     @Param("currentUserId") Long currentUserId);
 
+        @Query("""
+        SELECT c
+        FROM Conversation c
+        WHERE (c.user1.id = :meId AND c.user2.id = :friendId)
+           OR (c.user2.id = :meId AND c.user1.id = :friendId)
+    """)
+        Optional<Conversation> findConversationBetween(
+                @Param("meId") Long meId,
+                @Param("friendId") Long friendId
+        );
+
 }

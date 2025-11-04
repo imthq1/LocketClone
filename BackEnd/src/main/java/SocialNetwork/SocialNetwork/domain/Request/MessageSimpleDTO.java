@@ -1,6 +1,5 @@
-package SocialNetwork.SocialNetwork.domain;
+package SocialNetwork.SocialNetwork.domain.Request;
 
-import SocialNetwork.SocialNetwork.domain.Response.UserDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

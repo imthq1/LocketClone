@@ -3,7 +3,7 @@ package SocialNetwork.SocialNetwork.util.mapper;
 
 import SocialNetwork.SocialNetwork.domain.Conversation;
 import SocialNetwork.SocialNetwork.domain.Message;
-import SocialNetwork.SocialNetwork.domain.MessageSimpleDTO;
+import SocialNetwork.SocialNetwork.domain.Request.MessageSimpleDTO;
 import SocialNetwork.SocialNetwork.domain.Response.ConversationDTO;
 import SocialNetwork.SocialNetwork.domain.User;
 import java.util.List;

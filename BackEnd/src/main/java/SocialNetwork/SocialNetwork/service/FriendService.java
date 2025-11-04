@@ -1,16 +1,21 @@
 package SocialNetwork.SocialNetwork.service;
 
+import SocialNetwork.SocialNetwork.domain.Conversation;
 import SocialNetwork.SocialNetwork.domain.FriendRequest;
+import SocialNetwork.SocialNetwork.domain.Message;
 import SocialNetwork.SocialNetwork.domain.Request.FriendRequestItemDTO;
 import SocialNetwork.SocialNetwork.domain.Response.FriendRequestBySender;
 import SocialNetwork.SocialNetwork.domain.Response.UserDTO;
 import SocialNetwork.SocialNetwork.domain.User;
+import SocialNetwork.SocialNetwork.repository.ConversationRepository;
 import SocialNetwork.SocialNetwork.repository.FriendRequestRepository;
+import SocialNetwork.SocialNetwork.repository.MessageRepository;
 import SocialNetwork.SocialNetwork.repository.UserRepository;
 import SocialNetwork.SocialNetwork.util.Enum.friendStatus;
 import SocialNetwork.SocialNetwork.util.SecurityUtil;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -26,14 +31,19 @@ public class FriendService {
     private final UserService userService;
     private final SecurityUtil securityUtil;
     private final ChatService chatService;
+    private final ConversationRepository conversationRepository;
+    private final MessageRepository messageRepository;
+
     public FriendService(FriendRequestRepository friendRequestRepository,
                          UserRepository userRepository, UserService userService, SecurityUtil securityUtil,
-                         ChatService chatService) {
+                         ChatService chatService, ConversationRepository conversationRepository, MessageRepository messageRepository) {
         this.friendRequestRepository = friendRequestRepository;
         this.userRepository = userRepository;
         this.userService = userService;
         this.securityUtil = securityUtil;
         this.chatService = chatService;
+        this.conversationRepository = conversationRepository;
+        this.messageRepository = messageRepository;
     }
     public void sendRequestFr(String email, long addressee_id ) {
         User  userSendRequestFr = userRepository.findByEmail(email);
@@ -72,18 +82,47 @@ public class FriendService {
         friendRequestRepository.save(friendRequest);
     }
     public List<UserDTO> getListFr() {
-        String email=SecurityUtil.getCurrentUserLogin().get();
-        List<User> userList=this.friendRequestRepository.findFriendsOf(email);
-        return userList.stream().map(u->{
-            UserDTO userDTO = new UserDTO();
-            userDTO.setId(u.getId());
-            userDTO.setEmail(u.getEmail());
-            userDTO.setFullname(u.getFullname());
-            userDTO.setImage(u.getImageUrl());
-            userDTO.setAddress(u.getAddress());
-            return userDTO;
+        String email = SecurityUtil.getCurrentUserLogin().get();
+        User me = this.userService.getUserByEmail(email);
+
+        List<User> friends = this.friendRequestRepository.findFriendsOf(email);
+
+        return friends.stream().map(friend -> {
+            UserDTO dto = new UserDTO();
+            dto.setId(friend.getId());
+            dto.setEmail(friend.getEmail());
+            dto.setFullname(friend.getFullname());
+            dto.setImage(friend.getImageUrl());
+            dto.setAddress(friend.getAddress());
+
+            Optional<Conversation> convOpt = conversationRepository.findConversationBetween(me.getId(), friend.getId());
+
+            if (convOpt.isPresent()) {
+                Conversation conv = convOpt.get();
+
+                List<Message> lastMsgList = messageRepository.findLastMessage(conv.getId(), PageRequest.of(0, 1));
+                if (!lastMsgList.isEmpty()) {
+                    Message last = lastMsgList.get(0);
+                    UserDTO.LastMessageDTO lastMsgDTO = new UserDTO.LastMessageDTO();
+                    lastMsgDTO.setContent(last.getContent());
+                    lastMsgDTO.setCreatedAt(last.getCreatedAt());
+                    lastMsgDTO.setSenderId(last.getSender().getId());
+                    dto.setLastMessage(lastMsgDTO);
+                } else {
+                    UserDTO.LastMessageDTO empty = new UserDTO.LastMessageDTO();
+                    empty.setContent("Hãy gửi lời chào 👋");
+                    dto.setLastMessage(empty);
+                }
+            } else {
+                UserDTO.LastMessageDTO empty = new UserDTO.LastMessageDTO();
+                empty.setContent("Hãy gửi lời chào 👋");
+                dto.setLastMessage(empty);
+            }
+
+            return dto;
         }).toList();
     }
+
     @Transactional()
     public Page<FriendRequestBySender> listFriendBySender(String senderEmail, friendStatus status, Pageable pageable) {
         User me = userService.getUserByEmail(senderEmail);

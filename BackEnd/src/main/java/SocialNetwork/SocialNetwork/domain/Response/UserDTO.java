@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.util.List;
 
 @Getter
@@ -19,6 +20,7 @@ public class UserDTO {
     private String RoleName;
     private String image;
     private Friend friend;
+    private LastMessageDTO lastMessage;
     @Getter
     @Setter
     @AllArgsConstructor
@@ -27,5 +29,16 @@ public class UserDTO {
         private long sumUser;
         private List<UserDTO> friends;
     }
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class LastMessageDTO {
+        private String content;
+        private Instant createdAt;
+        private Long senderId;
+
+    }
+
 
 }
