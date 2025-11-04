@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:locket_clone/theme/app_colors.dart';
 import 'package:locket_clone/services/data/models/user_dto.dart';
+import 'package:locket_clone/shared/cloudinary_helper.dart';
 import '../utils/initials.dart';
 
 class FriendTile extends StatelessWidget {
@@ -10,7 +11,7 @@ class FriendTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final url = user.image;
+    final avatarUrl = (user.image ?? '').trim();
     final displayName = (user.fullname.isNotEmpty)
         ? user.fullname
         : (user.email);
@@ -18,17 +19,16 @@ class FriendTile extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       leading: CircleAvatar(
-        radius: 26,
-        backgroundColor: AppColors.background,
-        backgroundImage: (url != null && url.isNotEmpty)
-            ? NetworkImage(url)
+        backgroundColor: AppColors.fieldBackground,
+        backgroundImage: avatarUrl.isNotEmpty
+            ? NetworkImage(buildCloudinaryUrl(avatarUrl))
             : null,
-        child: (url == null || url.isEmpty)
+        child: avatarUrl.isEmpty
             ? Text(
                 initialsFrom(displayName),
                 style: const TextStyle(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                  fontSize: 18,
                 ),
               )
             : null,
@@ -40,12 +40,11 @@ class FriendTile extends StatelessWidget {
           fontWeight: FontWeight.w800,
         ),
       ),
-      // ✅ Nút X giống phần “incoming/sent”
       trailing: IconButton(
         tooltip: 'Hủy kết bạn',
         onPressed: onUnfriend,
         style: IconButton.styleFrom(
-          backgroundColor: Colors.red.shade500,
+          backgroundColor: Colors.transparent,
           foregroundColor: Colors.white,
           shape: const CircleBorder(),
           minimumSize: const Size(40, 40),

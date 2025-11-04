@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:locket_clone/screens/friends/utils/initials.dart';
 import 'package:locket_clone/services/application/friends_controller.dart';
+import 'package:locket_clone/shared/cloudinary_helper.dart';
+import 'package:locket_clone/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:locket_clone/screens/friends/widgets/status_chip.dart';
 
 class SearchResult extends StatelessWidget {
+  const SearchResult({super.key});
+
   @override
   Widget build(BuildContext context) {
     final ctrl = context.watch<FriendsController>();
@@ -28,8 +33,9 @@ class SearchResult extends StatelessWidget {
     }
     if (ctrl.searchResult != null) {
       final user = ctrl.searchResult!;
-      final hasImg = (user.image != null && user.image!.isNotEmpty);
+      final avatarUrl = (user.image ?? '').trim();
       final rel = ctrl.searchRelation ?? RelationStatus.none;
+      final displayName = user.fullname;
 
       Widget trailing;
       switch (rel) {
@@ -40,10 +46,10 @@ class SearchResult extends StatelessWidget {
           trailing = const StatusChip('Đã là bạn');
           break;
         case RelationStatus.outgoing:
-          trailing = const StatusChip('Đã gửi lời mời');
+          trailing = const StatusChip('Đã gửi');
           break;
         case RelationStatus.incoming:
-          trailing = const StatusChip('Chờ bạn xác nhận');
+          trailing = const StatusChip('Chờ xác nhận');
           break;
         case RelationStatus.none:
           trailing = FilledButton(
@@ -76,11 +82,28 @@ class SearchResult extends StatelessWidget {
 
       return ListTile(
         leading: CircleAvatar(
-          backgroundImage: hasImg ? NetworkImage(user.image!) : null,
-          child: !hasImg ? const Icon(Icons.person) : null,
+          backgroundColor: AppColors.fieldBackground,
+          backgroundImage: avatarUrl.isNotEmpty
+              ? NetworkImage(buildCloudinaryUrl(avatarUrl))
+              : null,
+          child: avatarUrl.isEmpty
+              ? Text(
+                  initialsFrom(displayName),
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 18,
+                  ),
+                )
+              : null,
         ),
-        title: Text(user.fullname),
-        subtitle: Text(user.email),
+        title: Text(
+          user.fullname,
+          style: TextStyle(color: AppColors.textPrimary),
+        ),
+        subtitle: Text(
+          user.email,
+          style: TextStyle(color: AppColors.textSecondary),
+        ),
         trailing: trailing,
       );
     }

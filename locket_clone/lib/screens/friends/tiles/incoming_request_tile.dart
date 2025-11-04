@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:locket_clone/services/data/models/friend_request_dto.dart';
+import 'package:locket_clone/shared/cloudinary_helper.dart';
 import 'package:locket_clone/theme/app_colors.dart';
 import '../utils/initials.dart';
 
@@ -17,29 +18,30 @@ class IncomingRequestTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final avatar = item.requesterAvatar;
-    final name = item.requesterFullname.isNotEmpty
+    final avatarUrl = item.requesterAvatar;
+    final displayName = item.requesterFullname.isNotEmpty
         ? item.requesterFullname
         : item.requesterEmail;
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       leading: CircleAvatar(
-        radius: 24,
-        backgroundColor: AppColors.background,
-        backgroundImage: avatar.isNotEmpty ? NetworkImage(avatar) : null,
-        child: avatar.isEmpty
+        backgroundColor: AppColors.fieldBackground,
+        backgroundImage: avatarUrl.isNotEmpty
+            ? NetworkImage(buildCloudinaryUrl(avatarUrl))
+            : null,
+        child: avatarUrl.isEmpty
             ? Text(
-                initialsFrom(name),
+                initialsFrom(displayName),
                 style: const TextStyle(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                  fontSize: 18,
                 ),
               )
             : null,
       ),
       title: Text(
-        name,
+        displayName,
         style: const TextStyle(
           color: AppColors.textPrimary,
           fontWeight: FontWeight.w700,
@@ -54,7 +56,7 @@ class IncomingRequestTile extends StatelessWidget {
             onPressed: onReject,
             tooltip: 'Huỷ',
             style: IconButton.styleFrom(
-              backgroundColor: Colors.red.shade500,
+              backgroundColor: Colors.transparent,
               foregroundColor: Colors.white,
               shape: const CircleBorder(),
               minimumSize: const Size(40, 40), // chỉnh kích thước nút
@@ -66,7 +68,7 @@ class IncomingRequestTile extends StatelessWidget {
             onPressed: onAccept,
             tooltip: 'Đồng ý',
             style: IconButton.styleFrom(
-              backgroundColor: AppColors.brandYellow,
+              backgroundColor: Colors.transparent,
               foregroundColor: Colors.white,
               shape: const CircleBorder(),
               minimumSize: const Size(40, 40),

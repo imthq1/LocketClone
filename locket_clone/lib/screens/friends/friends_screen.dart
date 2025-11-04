@@ -159,7 +159,10 @@ class _FriendsScreenState extends State<FriendsScreen> {
               const SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Text('Hiện chưa có lời mời mới.'),
+                  child: Text(
+                    'Hiện chưa có lời mời mới.',
+                    style: TextStyle(color: AppColors.textHint),
+                  ),
                 ),
               ),
 
@@ -227,7 +230,10 @@ class _FriendsScreenState extends State<FriendsScreen> {
               const SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Text('Bạn chưa gửi lời mời nào.'),
+                  child: Text(
+                    'Bạn chưa gửi lời mời nào.',
+                    style: TextStyle(color: AppColors.textHint),
+                  ),
                 ),
               ),
 
