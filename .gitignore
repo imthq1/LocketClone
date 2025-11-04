@@ -97,3 +97,4 @@ jacoco.exec
 # Nếu bạn có file cấu hình local riêng, có thể bỏ qua:
 # application-local.properties
 # application-local.yml
+BackEnd/src/main/resources/application.properties

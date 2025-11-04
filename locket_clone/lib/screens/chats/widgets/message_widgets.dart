@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:locket_clone/screens/chats/chat_screen.dart';
+import 'package:locket_clone/services/application/auth_controller.dart';
 import 'package:locket_clone/services/data/models/chat_dto.dart';
 import 'package:locket_clone/services/data/models/user_dto.dart';
 import 'package:locket_clone/theme/app_colors.dart';
 import 'package:locket_clone/shared/cloudinary_helper.dart';
 import 'package:locket_clone/screens/friends/utils/initials.dart';
+import 'package:provider/provider.dart';
 
 class ChatRow extends StatelessWidget {
   final UserDTO user;
@@ -73,11 +75,35 @@ class ChatRow extends StatelessWidget {
           fontWeight: FontWeight.w700,
         ),
       ),
-      subtitle: const Text(
-        'Say hi 👋',
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+      subtitle: Builder(
+        builder: (context) {
+          final lastMsg = user.lastMessage;
+          String subtitleText = 'Say hi 👋'; // Mặc định
+          bool isMyMessage = false;
+
+          if (lastMsg?.content != null && lastMsg!.content!.isNotEmpty) {
+            final meId = context.watch<AuthController>().user?.id;
+
+            // Kiểm tra xem có phải tin nhắn cuối là của tôi không
+            if (meId != null && lastMsg.senderId == meId) {
+              isMyMessage = true;
+              subtitleText = 'Bạn: ${lastMsg.content}';
+            } else {
+              subtitleText = lastMsg.content!;
+            }
+          }
+
+          return Text(
+            subtitleText,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: isMyMessage ? AppColors.textHint : AppColors.textSecondary,
+              fontSize: 14,
+              fontWeight: isMyMessage ? FontWeight.normal : FontWeight.w500,
+            ),
+          );
+        },
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,

@@ -6,6 +6,7 @@ class UserDTO {
   final String? image;
   final String? roleName;
   final ListFriend? friend;
+  final LastMessageSummaryDTO? lastMessage;
 
   const UserDTO({
     required this.id,
@@ -15,6 +16,7 @@ class UserDTO {
     this.image,
     this.roleName,
     this.friend,
+    this.lastMessage,
   });
 
   factory UserDTO.fromJson(Map<String, dynamic> json) => UserDTO(
@@ -27,6 +29,11 @@ class UserDTO {
     friend: json['friend'] == null
         ? null
         : ListFriend.fromJson(json['friend'] as Map<String, dynamic>),
+    lastMessage: json['lastMessage'] == null
+        ? null
+        : LastMessageSummaryDTO.fromJson(
+            json['lastMessage'] as Map<String, dynamic>,
+          ),
   );
 
   Map<String, dynamic> toJson() => {
@@ -37,6 +44,7 @@ class UserDTO {
     'image': image,
     'roleName': roleName,
     'friend': friend?.toJson(),
+    'lastMessage': lastMessage?.toJson(),
   };
 }
 
@@ -57,5 +65,28 @@ class ListFriend {
   Map<String, dynamic> toJson() => {
     'sumUser': sumUser,
     'friends': friends.map((e) => e.toJson()).toList(),
+  };
+}
+
+class LastMessageSummaryDTO {
+  final String? content;
+  final DateTime? createdAt;
+  final int? senderId;
+
+  const LastMessageSummaryDTO({this.content, this.createdAt, this.senderId});
+
+  factory LastMessageSummaryDTO.fromJson(Map<String, dynamic> json) =>
+      LastMessageSummaryDTO(
+        content: json['content'] as String?,
+        createdAt: json['createdAt'] != null
+            ? DateTime.parse(json['createdAt'] as String).toLocal()
+            : null,
+        senderId: (json['senderId'] as num?)?.toInt(),
+      );
+
+  Map<String, dynamic> toJson() => {
+    'content': content,
+    'createdAt': createdAt?.toIso8601String(),
+    'senderId': senderId,
   };
 }
