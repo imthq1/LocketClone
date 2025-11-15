@@ -8,46 +8,50 @@
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Redis](https://img.shields.io/badge/Redis-DC382D%3Flogo%3Dredis%26logoColor%3Dwhite)](https://redis.io)
 
+A full-stack project simulating the Locket social media application, including a **Spring Boot Backend** server and a **Flutter Frontend** mobile app.
+
 ---
 
-Dự án full-stack mô phỏng ứng dụng mạng xã hội Locket, bao gồm một máy chủ **Backend Spring Boot** và một ứng dụng di động **Frontend Flutter**.
+## Key Features
 
-## Tính năng chính
+* **User Authentication:** Register, login, logout using **JWT (Access Token + Refresh Token)**. The Access Token is stored on the client, and the Refresh Token is handled to automatically refresh the token.
+* **Password Recovery:** Password recovery flow via email using **Redis** to store and validate OTPs.
+* **Friend Management:** Search for users by email, send, accept, decline friend requests, and unfriend users.
+* **Posts (Feed):** Users can create posts (image and caption). The feed displays posts from friends and oneself.
+* **Image Upload:** Integrated with **Cloudinary** service for storing profile pictures and post images.
+* **Realtime Chat:** Real-time messaging between two users using **WebSocket (STOMP)**, including a "typing indicator" feature.
+* **Profile Management:** Users can update their display name and profile picture.
 
-  * **Xác thực người dùng:** Đăng ký, đăng nhập, đăng xuất sử dụng **JWT (Access Token + Refresh Token)**. Access Token được lưu trên client và Refresh Token được xử lý để làm mới token tự động.
-  * **Khôi phục mật khẩu:** Luồng khôi phục mật khẩu qua email sử dụng **Redis** để lưu trữ và xác thực OTP.
-  * **Quản lý bạn bè:** Tìm kiếm người dùng qua email, gửi, chấp nhận, từ chối lời mời kết bạn và hủy kết bạn.
-  * **Bài đăng (Feed):** Người dùng có thể tạo bài đăng (ảnh và chú thích). Feed hiển thị các bài đăng từ bạn bè và của chính mình.
-  * **Upload ảnh:** Tích hợp dịch vụ **Cloudinary** để lưu trữ ảnh đại diện và ảnh bài đăng.
-  * **Chat Realtime:** Nhắn tin thời gian thực giữa hai người dùng sử dụng **WebSocket (STOMP)**, bao gồm cả tính năng "đang gõ" (typing indicator).
-  * **Quản lý hồ sơ:** Người dùng có thể cập nhật tên hiển thị và ảnh đại diện.
+## Project Structure
 
-## Cấu trúc dự án
+This repository includes two main projects:
 
-Kho lưu trữ này bao gồm hai dự án chính:
+1.  `./BackEnd/`: The Spring Boot API project.
+2.  `./locket_clone/`: The Flutter mobile application project.
 
-1.  `./BackEnd/`: Dự án Spring Boot API.
-2.  `./locket_clone/`: Dự án ứng dụng di động Flutter.
-
-## 🛠️ Công nghệ sử dụng
+## Tech Stack
 
 ### Backend (Spring Boot)
 
-  * **Ngôn ngữ:** Java 17
-  * **Framework:** Spring Boot 3
-  * **Bảo mật:** Spring Security (Xác thực JWT)
-  * **Database:** Spring Data JPA, MySQL
-  * **Realtime:** Spring WebSocket (STOMP) cho tính năng chat
-  * **Cache/OTP:** Redis
-  * **Lưu trữ file:** Cloudinary
-  * **Gửi Email:** Spring Boot Starter Mail (dùng cho OTP)
-  * **Container:** Docker (cho Redis)
+* **Language:** Java 17
+* **Framework:** Spring Boot 3
+* **Security:** Spring Security (JWT Authentication)
+* **Database:** Spring Data JPA, MySQL
+* **Realtime:** Spring WebSocket (STOMP) for chat
+* **Cache/OTP:** Redis
+* **File Storage:** Cloudinary
+* **Email:** Spring Boot Starter Mail (for OTP)
+* **Containerization:** Docker (for Redis)
 
 ### Frontend (Flutter)
 
-  * **Quản lý State:** Provider
-  * **Networking:** Dio (với Interceptor tự động refresh token)
-  * **Lưu trữ an toàn:** `flutter_secure_storage` (để lưu Access Token)
-  * **Realtime:** `stomp_dart_client` (để kết nối WebSocket với backend)
-  * **Thiết bị:** `camera`, `image_picker`
-  * **Quyền:** `permission_handler`
+* **State Management:** Provider
+* **Networking:** Dio (with interceptor for auto token refresh)
+* **Secure Storage:** `flutter_secure_storage` (for storing Access Token)
+* **Realtime:** `stomp_dart_client` (for WebSocket connection)
+* **Device:** `camera`, `image_picker`
+* **Permissions:** `permission_handler`
+
+## License
+
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
