@@ -40,7 +40,7 @@ This repository includes two main projects:
 * **Realtime:** Spring WebSocket (STOMP) for chat
 * **Cache/OTP:** Redis
 * **File Storage:** Cloudinary
-* **Email:** Spring Boot Starter Mail (for OTP)
+* **Email:** Mail Sender (for OTP)
 * **Containerization:** Docker (for Redis)
 
 ### Frontend (Flutter)
@@ -51,6 +51,65 @@ This repository includes two main projects:
 * **Realtime:** `stomp_dart_client` (for WebSocket connection)
 * **Device:** `camera`, `image_picker`
 * **Permissions:** `permission_handler`
+  
+## Interface
+
+### Home Interface & Profile
+<table>
+  <tr>
+    <td align="center"><b>Home Interface</b></td>
+    <td align="center"><b>Profile</b></td>
+  </tr>
+  <tr>
+    <td><img width="379" height="812" src="https://github.com/user-attachments/assets/d06f95a3-6a06-4861-955b-ce5528652365" /></td>
+    <td><img width="365" height="811" src="https://github.com/user-attachments/assets/07a3bdb5-cd03-419f-9ca8-c698a9c892aa" /></td>
+  </tr>
+</table>
+
+---
+
+### Friend & Message
+<table>
+  <tr>
+    <td align="center"><b>Friend</b></td>
+    <td align="center"><b>Message</b></td>
+  </tr>
+  <tr>
+    <td><img width="362" height="812" src="https://github.com/user-attachments/assets/94a107ef-3736-46d4-949f-1780a1763ff0" /></td>
+    <td><img width="377" height="820" src="https://github.com/user-attachments/assets/043d4311-3f95-4342-aad6-5132a143ec8d" /></td>
+  </tr>
+</table>
+
+---
+
+### Chat Message & Upload Image
+<table>
+  <tr>
+    <td align="center"><b>Chat Message</b></td>
+    <td align="center"><b>Upload Image</b></td>
+  </tr>
+  <tr>
+    <td><img width="367" height="815" src="https://github.com/user-attachments/assets/e3b7eed5-e98f-4d46-9f58-5f79c681187d" /></td>
+    <td><img width="368" height="813" src="https://github.com/user-attachments/assets/1b5b5178-e0fc-447d-ae86-09548d584832" /></td>
+  </tr>
+</table>
+
+---
+
+### History
+<table>
+  <tr>
+    <td align="center"><b>History</b></td>
+    <td align="center"><b>History</b></td>
+  </tr>
+  <tr>
+    <td><img width="366" height="792" src="https://github.com/user-attachments/assets/5afbaf0c-877f-447c-9813-53e7f21b65ef" /></td>
+    <td><img width="368" height="804" alt="image" src="https://github.com/user-attachments/assets/94490bbf-0efe-4035-8add-162e7192506c" />
+</td>
+  </tr>
+</table>
+
+
 
 ## License
 
